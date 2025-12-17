@@ -12,7 +12,23 @@
       "Bash(.venv/Scripts/python.exe -m pytest tests/ -v --tb=short)",
       "Bash(cat:*)",
       "Bash(git add:*)",
-      "Bash(git commit -m \"$(cat <<''EOF''\nAdd comprehensive documentation, testing infrastructure, and CI/CD\n\nMajor additions:\n- ARCHITECTURE.md: Technical documentation with component overview\n- CONTRIBUTING.md: Developer guide with code style, testing, and PR process\n- USAGE.md: User-facing documentation with installation and usage guides\n- PORTING.md: Notes for future C# port to PowerToys\n- GitHub Actions workflows (ci.yml, release.yml) for automated testing and releases\n\nTesting:\n- pytest.ini and requirements-dev.txt for test configuration\n- Smoke tests for import validation\n- Unit tests for config and lockfile handling\n- Integration tests for keyboard controller\n- Shared fixtures in conftest.py with proper mocking\n\nCode improvements:\n- Added WHY-focused comments throughout all modules\n- Fixed unicode escape errors in path_util.py docstrings\n- Removed unused update_window.py and update_util.py modules\n- Updated build.bat with modern PyInstaller options\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\")"
+      "Bash(git commit -m \"$(cat <<''EOF''\nAdd comprehensive documentation, testing infrastructure, and CI/CD\n\nMajor additions:\n- ARCHITECTURE.md: Technical documentation with component overview\n- CONTRIBUTING.md: Developer guide with code style, testing, and PR process\n- USAGE.md: User-facing documentation with installation and usage guides\n- PORTING.md: Notes for future C# port to PowerToys\n- GitHub Actions workflows (ci.yml, release.yml) for automated testing and releases\n\nTesting:\n- pytest.ini and requirements-dev.txt for test configuration\n- Smoke tests for import validation\n- Unit tests for config and lockfile handling\n- Integration tests for keyboard controller\n- Shared fixtures in conftest.py with proper mocking\n\nCode improvements:\n- Added WHY-focused comments throughout all modules\n- Fixed unicode escape errors in path_util.py docstrings\n- Removed unused update_window.py and update_util.py modules\n- Updated build.bat with modern PyInstaller options\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(ls:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nRename project from CatLock to PawGate\n\nComplete project-wide rebranding from CatLock/catlock/cat-lock to PawGate/pawgate:\n\nSource Code (src/):\n- Class renamed: CatLockCore → PawGateCore\n- Environment variable: CATLOCK_DEV → PAWGATE_DEV\n- User data directory: ~/.catlock/ → ~/.pawgate/\n- App display name in tray icon and notifications\n\nDocumentation:\n- Updated all .md files with new branding\n- Added logo and shields badges to README\n- Updated CI/CD workflow files\n\nBuild & Config:\n- Build script now produces PawGate.exe\n- Updated pytest.ini and requirements-dev.txt\n\nTests:\n- Updated all test references and assertions\n- All 19 tests pass with 72% coverage\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git branch:*)",
+      "Bash(git push:*)",
+      "Bash(gh repo edit:*)",
+      "Bash(gh repo view:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nAdd attribution to original CatLock project\n\n- Add Attribution section crediting @richiehowelll and linking to original repo\n- Update Support section to clearly direct donations to original author\n- Update \"Tested by\" section\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(gh label create:*)",
+      "Bash(gh label list:*)",
+      "Bash(.venv/Scripts/pyinstaller:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(.venv/Scripts/python.exe:*)",
+      "Bash(cmd /c build.bat)",
+      "Bash(cmd /c \".venv\\Scripts\\pyinstaller.exe --onefile --distpath=dist --workpath=build --add-data=resources/img/icon.ico;resources/img/ --add-data=resources/img/icon.png;resources/img/ --add-data=resources/config/config.json;resources/config/ --icon=resources/img/icon.ico --hidden-import plyer.platforms.win.notification --noconsole --name=PawGate src/main.py\")",
+      "Bash(cmd /c C:/github/pawgate/build_nopause.bat)",
+      "Bash(C:/github/pawgate/.venv/Scripts/python.exe -m PyInstaller:*)"
     ]
   }
 }
