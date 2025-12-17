@@ -44,15 +44,15 @@ import webbrowser
 
 def open_about():
     """
-    Open the CatLock About page in user's default browser.
+    Open the PawGate About page in user's default browser.
 
     The About page explains:
-    - What CatLock does (protect your computer from cats)
+    - What PawGate does (protect your computer from cats)
     - How to use it (hotkeys, tray icon menu)
     - Why it was created (real problem with real feline Fiona)
 
     WHY open on first run:
-        Users who just installed CatLock might not understand what it does or
+        Users who just installed PawGate might not understand what it does or
         how to use it. Opening the About page provides immediate context and
         reduces "What is this thing?" confusion.
 
@@ -80,7 +80,7 @@ def open_buy_me_a_coffee():
         - Common in open-source community
 
     WHY in tray menu:
-        Users who find CatLock valuable can easily support it without
+        Users who find PawGate valuable can easily support it without
         hunting for a GitHub sponsors link or donation page.
 
     URL: https://buymeacoffee.com/richiehowelll
@@ -94,12 +94,12 @@ def open_buy_me_a_coffee():
 
 def open_help():
     """
-    Open the CatLock FAQ/Help page in user's default browser.
+    Open the PawGate FAQ/Help page in user's default browser.
 
     The Help page answers common questions:
     - How do I change the hotkey?
     - Why isn't my keyboard locking?
-    - How do I uninstall CatLock?
+    - How do I uninstall PawGate?
     - Does it work with multiple monitors?
     - Can I lock automatically when I leave?
 

@@ -1,11 +1,11 @@
 """
-System Tray Icon - User interface and menu for CatLock.
+System Tray Icon - User interface and menu for PawGate.
 
 This module creates and manages the Windows system tray icon (notification area)
-that serves as the primary UI for CatLock when running in the background.
+that serves as the primary UI for PawGate when running in the background.
 
 The tray icon provides:
-    - Visual indication that CatLock is running
+    - Visual indication that PawGate is running
     - Menu for locking keyboard manually
     - Settings: opacity, notifications on/off
     - Help/About/Support links
@@ -65,13 +65,13 @@ from src.util.web_browser_util import open_about, open_buy_me_a_coffee, open_hel
 
 class TrayIcon:
     """
-    System tray icon and menu for CatLock.
+    System tray icon and menu for PawGate.
 
     This class manages the Windows notification area icon and its context menu,
     providing user access to settings and actions.
 
     Attributes:
-        main: Reference to CatLockCore instance (for config and callbacks)
+        main: Reference to PawGateCore instance (for config and callbacks)
 
     WHY pass main instance:
         Menu callbacks need access to:
@@ -85,7 +85,7 @@ class TrayIcon:
         Initialize tray icon with reference to main application.
 
         Args:
-            main: CatLockCore instance that owns this tray icon
+            main: PawGateCore instance that owns this tray icon
         """
         self.main = main
 
@@ -101,7 +101,7 @@ class TrayIcon:
         forced termination.
 
         See also:
-            - config.py: Handles persistence to ~/.catlock/config/config.json
+            - config.py: Handles persistence to ~/.pawgate/config/config.json
         """
         self.main.config.opacity = opacity
         self.main.config.save()
@@ -214,7 +214,7 @@ class TrayIcon:
             # Help submenu: External links to documentation and support
             MenuItem("About", Menu(
                 MenuItem("Help", open_help),  # FAQ page
-                MenuItem("About", open_about),  # What is CatLock page
+                MenuItem("About", open_about),  # What is PawGate page
                 MenuItem("Support ☕", open_buy_me_a_coffee),  # Donation link
             )),
 
@@ -224,7 +224,7 @@ class TrayIcon:
 
         # Create icon instance with image and menu
         # Args: name (for accessibility), image, tooltip, menu
-        tray_icon = Icon("CatLock", image, "CatLock", menu)
+        tray_icon = Icon("PawGate", image, "PawGate", menu)
 
         # Run the icon's event loop (blocks until icon.stop() called)
         # WHY blocks: Must continuously process Windows messages for icon and menu

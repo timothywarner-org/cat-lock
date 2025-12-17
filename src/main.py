@@ -1,7 +1,7 @@
 """
-CatLock Main Application - Core orchestration and event loop.
+PawGate Main Application - Core orchestration and event loop.
 
-This module serves as the central coordinator for CatLock, managing:
+This module serves as the central coordinator for PawGate, managing:
 - Keyboard blocking via the `keyboard` library (boppreh/keyboard)
 - Hotkey registration and lifecycle (See also: hotkey_listener.py)
 - System tray icon in a separate thread (See also: tray_icon.py)
@@ -50,9 +50,9 @@ from src.ui.overlay_window import OverlayWindow
 from src.util.lockfile_handler import check_lockfile, remove_lockfile
 
 
-class CatLockCore:
+class PawGateCore:
     """
-    Main application coordinator for CatLock.
+    Main application coordinator for PawGate.
 
     This class manages the lifecycle of all components and coordinates
     communication between threads via queues and shared state.
@@ -60,7 +60,7 @@ class CatLockCore:
     Attributes:
         hotkey_thread: Thread running the global hotkey listener
         show_overlay_queue: Thread-safe queue for hotkey activation signals
-        config: Configuration manager (loads from ~/.catlock/config/config.json)
+        config: Configuration manager (loads from ~/.pawgate/config/config.json)
         root: Tkinter root window (None when not locked)
         hotkey_lock: Threading lock to prevent race conditions during hotkey changes
         listen_for_hotkey: Flag to control hotkey listener loop
@@ -82,7 +82,7 @@ class CatLockCore:
 
     def __init__(self) -> None:
         """
-        Initialize CatLock and start all background threads.
+        Initialize PawGate and start all background threads.
 
         WHY start threads in __init__:
             We want the tray icon and hotkey listener running immediately
@@ -98,7 +98,7 @@ class CatLockCore:
         self.show_overlay_queue = Queue()  # Signals from hotkey to main thread
 
         # Configuration and state
-        self.config = Config()  # Loads from ~/.catlock/config/config.json
+        self.config = Config()  # Loads from ~/.pawgate/config/config.json
         self.root = None  # Tkinter window (created on-demand when locking)
 
         # Hotkey management
@@ -291,7 +291,7 @@ class CatLockCore:
 
     def quit_program(self, icon, item) -> None:
         """
-        Gracefully shut down CatLock and clean up resources.
+        Gracefully shut down PawGate and clean up resources.
 
         This is called from the system tray "Quit" menu item.
 
@@ -386,9 +386,9 @@ class CatLockCore:
 
 
 if __name__ == "__main__":
-    # Entry point: Create the CatLock core and run the main event loop
+    # Entry point: Create the PawGate core and run the main event loop
     # WHY separate __init__ and start(): Initialization starts daemon threads
     # (tray icon, hotkey listener) but start() runs the blocking event loop.
     # This separation allows for testing and alternate entry points.
-    core = CatLockCore()
+    core = PawGateCore()
     core.start()

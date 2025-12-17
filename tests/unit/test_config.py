@@ -1,5 +1,5 @@
 """
-Unit tests for CatLock configuration management.
+Unit tests for PawGate configuration management.
 
 WHY: Config is the foundation of the application. Bugs in config loading
 or saving can cause crashes, data loss, or incorrect behavior. These tests

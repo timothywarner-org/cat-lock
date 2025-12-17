@@ -55,7 +55,7 @@ class OverlayWindow:
     locked and a click-to-unlock interface.
 
     Attributes:
-        main: Reference to CatLockCore instance (for config and callbacks)
+        main: Reference to PawGateCore instance (for config and callbacks)
 
     WHY pass main instance:
         The overlay needs:
@@ -70,7 +70,7 @@ class OverlayWindow:
         Initialize overlay with reference to main application.
 
         Args:
-            main: CatLockCore instance that owns this overlay
+            main: PawGateCore instance that owns this overlay
         """
         self.main = main
 

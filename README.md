@@ -1,6 +1,16 @@
-# CatLock
+<div align="center">
+  <img src="images/logo_image.png" alt="PawGate Logo" width="250">
 
-CatLock is a simple utility designed to prevent accidental keyboard input, particularly when your feline friend decides to grace your workspace.
+  # PawGate
+
+  [![CI](https://img.shields.io/github/actions/workflow/status/timothywarner-org/pawgate/ci.yml?label=CI&logo=github)](https://github.com/timothywarner-org/pawgate/actions/workflows/ci.yml)
+  [![Release](https://img.shields.io/github/actions/workflow/status/timothywarner-org/pawgate/release.yml?label=Release&logo=github)](https://github.com/timothywarner-org/pawgate/actions/workflows/release.yml)
+  [![Coverage](https://img.shields.io/badge/coverage-72%25-green)](https://github.com/timothywarner-org/pawgate)
+  [![Author](https://img.shields.io/badge/Author-Tim%20Warner-blue)](https://techtrainertim.com)
+
+</div>
+
+PawGate is a simple utility designed to prevent accidental keyboard input, particularly when your feline friend decides to grace your workspace.
 Currently only supported on **Windows**.
 
 ## Features
@@ -28,7 +38,7 @@ build.bat
 ```bash
 pip install -r requirements.txt
 pip install pyinstaller
-pyinstaller --onefile --add-data="./resources/img/icon.ico;./resources/img/" --add-data="./resources/img/icon.png;./resources/img/" --add-data="./resources/config/config.json;./resources/config/" --icon="./resources/img/icon.ico" --hidden-import plyer.platforms.win.notification --noconsole --name="CatLock" "./src/main.py"
+pyinstaller --onefile --add-data="./resources/img/icon.ico;./resources/img/" --add-data="./resources/img/icon.png;./resources/img/" --add-data="./resources/config/config.json;./resources/config/" --icon="./resources/img/icon.ico" --hidden-import plyer.platforms.win.notification --noconsole --name="PawGate" "./src/main.py"
 ```
 
 The executable will be in the `dist/` folder.
@@ -46,7 +56,7 @@ Pre-built executables are available on the [Releases](../../releases) page. Note
 
 ## Feature Backlog
 
-Future enhancements planned for CatLock. Contributions welcome!
+Future enhancements planned for PawGate. Contributions welcome!
 
 ### Tier 1: Automatic Cat Detection (The Dream)
 | Feature | Description | Status |
@@ -60,7 +70,7 @@ Future enhancements planned for CatLock. Contributions welcome!
 ### Tier 2: Quality of Life
 | Feature | Description | Status |
 |---------|-------------|--------|
-| Run on Windows startup | Option to launch CatLock at login | Planned |
+| Run on Windows startup | Option to launch PawGate at login | Planned |
 | Lock on screen saver/sleep | Auto-lock when user steps away | Planned |
 | Scheduled lock times | "Lock 9am-5pm on weekdays" | Planned |
 | Quick-toggle global hotkey | Enable/disable protection without menu | Planned |

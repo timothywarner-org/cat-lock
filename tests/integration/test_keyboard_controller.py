@@ -17,14 +17,14 @@ import unittest
 from unittest.mock import Mock, patch, call
 from queue import Queue
 
-from src.main import CatLockCore
+from src.main import PawGateCore
 
 
 class TestKeyboardController(unittest.TestCase):
     """
-    Integration tests for keyboard locking in CatLockCore.
+    Integration tests for keyboard locking in PawGateCore.
 
-    WHY: We test at the CatLockCore level (not isolated functions) because
+    WHY: We test at the PawGateCore level (not isolated functions) because
     keyboard blocking requires coordination between state management
     (blocked_keys set) and library calls (keyboard.block_key/unblock_key).
     This is true integration testing.
@@ -63,7 +63,7 @@ class TestKeyboardController(unittest.TestCase):
 
         # WHY: Create core after all patches are active to ensure
         # __init__ doesn't trigger real system interactions
-        self.core = CatLockCore()
+        self.core = PawGateCore()
 
     def tearDown(self) -> None:
         """

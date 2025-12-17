@@ -1,5 +1,5 @@
 """
-Unit tests for CatLock components.
+Unit tests for PawGate components.
 
 WHY: Empty __init__.py allows pytest to discover unit tests
 as a separate package from integration tests, enabling different

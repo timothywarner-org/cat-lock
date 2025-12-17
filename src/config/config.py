@@ -1,13 +1,13 @@
 """
 Configuration Management - Persistent user settings with fallback defaults.
 
-This module handles loading, saving, and validating CatLock's configuration.
-Settings are stored in JSON format at ~/.catlock/config/config.json.
+This module handles loading, saving, and validating PawGate's configuration.
+Settings are stored in JSON format at ~/.pawgate/config/config.json.
 
 Configuration architecture:
     1. Bundled defaults: resources/config/config.json (shipped with app)
-    2. User config: ~/.catlock/config/config.json (created on first run)
-    3. Dev mode: --reset-config flag or CATLOCK_DEV env var forces reset
+    2. User config: ~/.pawgate/config/config.json (created on first run)
+    3. Dev mode: --reset-config flag or PAWGATE_DEV env var forces reset
 
 Settings managed:
     - hotkey: Global keyboard shortcut to lock (default: "ctrl+l")
@@ -20,7 +20,7 @@ WHY JSON instead of Windows Registry or .ini:
     - No external dependencies (json module is stdlib)
     - Git-friendly for bundled defaults
 
-WHY ~/.catlock instead of AppData:
+WHY ~/.pawgate instead of AppData:
     - Consistent with Unix conventions (~/.config pattern)
     - Easier to find and edit for power users
     - Works in portable/non-admin installations
@@ -54,20 +54,20 @@ def should_use_bundled_config():
     Check if we should ignore local config and use bundled defaults.
 
     This is useful for:
-    - Development: Always start with known state (CATLOCK_DEV env var)
+    - Development: Always start with known state (PAWGATE_DEV env var)
     - User troubleshooting: Reset corrupt config (--reset-config flag)
     - Testing: Predictable configuration in CI/CD
 
     Returns:
         bool: True if local config should be ignored and reset to defaults
 
-    WHY environment variable: Developers can set CATLOCK_DEV=1 in their
+    WHY environment variable: Developers can set PAWGATE_DEV=1 in their
     environment to always use fresh config without passing command-line args.
 
     WHY command-line flag: Users can easily reset config without editing
     or deleting files. This is especially helpful if bad config prevents launch.
     """
-    return '--reset-config' in sys.argv or os.environ.get('CATLOCK_DEV')
+    return '--reset-config' in sys.argv or os.environ.get('PAWGATE_DEV')
 
 
 def load():
@@ -75,7 +75,7 @@ def load():
     Load configuration from user's config file, with fallback to bundled defaults.
 
     Loading priority:
-        1. If dev mode (--reset-config or CATLOCK_DEV): Force reset to bundled defaults
+        1. If dev mode (--reset-config or PAWGATE_DEV): Force reset to bundled defaults
         2. If user config exists and is valid JSON: Use it
         3. If user config missing or corrupt: Copy bundled defaults and use those
 
@@ -98,7 +98,7 @@ def load():
         error, not a runtime error we should silently handle.
 
     See also:
-        - get_config_path(): Returns ~/.catlock/config/config.json
+        - get_config_path(): Returns ~/.pawgate/config/config.json
         - get_packaged_path(): Handles PyInstaller bundled resources
     """
     # Dev mode: always use bundled config for predictable behavior
@@ -177,7 +177,7 @@ class Config:
             follows PEP 8 (snake_case). We translate at the boundary.
 
         WHY open about page on first run:
-            Welcomes new users and explains what CatLock does. Many users
+            Welcomes new users and explains what PawGate does. Many users
             install software and forget what it's for. The about page provides
             context and usage instructions.
         """
@@ -199,7 +199,7 @@ class Config:
         """
         Persist current configuration to disk.
 
-        Writes settings to ~/.catlock/config/config.json in JSON format.
+        Writes settings to ~/.pawgate/config/config.json in JSON format.
         Called whenever user changes settings via system tray menu.
 
         WHY print statement:

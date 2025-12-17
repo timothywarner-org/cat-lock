@@ -1,5 +1,5 @@
 """
-Shared pytest fixtures and test configuration for CatLock.
+Shared pytest fixtures and test configuration for PawGate.
 
 WHY: Centralize common test setup (mocks, temp files, fixtures) to avoid
 duplication across test modules and ensure consistent test isolation.
@@ -22,7 +22,7 @@ import pytest
 @pytest.fixture
 def valid_config_data() -> Dict[str, Any]:
     """
-    Provide a valid CatLock configuration dictionary.
+    Provide a valid PawGate configuration dictionary.
 
     WHY: Tests need known-good config data to verify loading behavior.
     """
@@ -36,7 +36,7 @@ def valid_config_data() -> Dict[str, Any]:
 @pytest.fixture
 def partial_config_data() -> Dict[str, Any]:
     """
-    Provide a partial CatLock configuration with missing keys.
+    Provide a partial PawGate configuration with missing keys.
 
     WHY: Tests need to verify Config handles missing keys gracefully
     by falling back to defaults.
@@ -56,7 +56,7 @@ def tmp_config_file() -> Generator[Path, None, None]:
     actual configuration. Using tempfile ensures automatic cleanup.
 
     Yields:
-        Path to temporary config file with default CatLock settings
+        Path to temporary config file with default PawGate settings
     """
     default_config: Dict[str, Any] = {
         "hotkey": "ctrl+l",
@@ -97,7 +97,7 @@ def mock_config_path(tmp_path, mocker) -> Path:
     Returns:
         Path to temp config.json file
     """
-    config_dir = tmp_path / ".catlock" / "config"
+    config_dir = tmp_path / ".pawgate" / "config"
     config_dir.mkdir(parents=True, exist_ok=True)
     config_file = config_dir / "config.json"
 
@@ -349,7 +349,7 @@ def reset_singletons():
     """
     Reset any singleton instances between tests to ensure isolation.
 
-    WHY: If CatLock uses singleton patterns, state can leak between tests.
+    WHY: If PawGate uses singleton patterns, state can leak between tests.
     This fixture resets them before each test.
     """
     yield

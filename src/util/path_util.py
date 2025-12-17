@@ -22,10 +22,10 @@ User data challenge:
     - Survives application updates/reinstalls
     - Is easy for power users to find and edit
 
-    We use ~/.catlock/ following Unix conventions, which translates to:
-    - C:/Users/username/.catlock/ on Windows
-    - /home/username/.catlock/ on Linux
-    - /Users/username/.catlock/ on macOS
+    We use ~/.pawgate/ following Unix conventions, which translates to:
+    - C:/Users/username/.pawgate/ on Windows
+    - /home/username/.pawgate/ on Linux
+    - /Users/username/.pawgate/ on macOS
 
 See also:
     - config.py: Uses these functions to load/save settings
@@ -59,7 +59,7 @@ def get_packaged_path(path: str) -> str:
 
     Example:
         Development: get_packaged_path("resources/img/icon.png")
-                    -> C:/github/cat-lock/resources/img/icon.png
+                    -> C:/github/pawgate/resources/img/icon.png
 
         Production:  get_packaged_path("resources/img/icon.png")
                     -> C:/Users/Tim/AppData/Local/Temp/_MEI123456/resources/img/icon.png
@@ -92,21 +92,21 @@ def get_config_path() -> str:
 
     Returns:
         str: Absolute path to config.json in user's home directory
-             (e.g., C:/Users/Tim/.catlock/config/config.json)
+             (e.g., C:/Users/Tim/.pawgate/config/config.json)
 
-    WHY ~/.catlock/config/:
-        - .catlock: Hidden directory (dot prefix) following Unix conventions
+    WHY ~/.pawgate/config/:
+        - .pawgate: Hidden directory (dot prefix) following Unix conventions
         - config/: Subdirectory for future expansion (logs/, cache/, etc.)
         - config.json: The actual configuration file
 
     WHY create directory:
-        On first run, ~/.catlock/ won't exist. We create it proactively so
+        On first run, ~/.pawgate/ won't exist. We create it proactively so
         the caller (config.py) can immediately write to config.json without
         worrying about directory creation.
 
     WHY os.makedirs() instead of os.mkdir():
         os.makedirs() creates all intermediate directories (like 'mkdir -p').
-        If only .catlock/ exists but config/ doesn't, makedirs() creates it.
+        If only .pawgate/ exists but config/ doesn't, makedirs() creates it.
 
     Permissions:
         No special permissions needed - this goes in user's home directory
@@ -117,9 +117,9 @@ def get_config_path() -> str:
         preference). No need for encryption or special permissions.
 
     Example:
-        Windows: C:/Users/Tim/.catlock/config/config.json
-        Linux:   /home/tim/.catlock/config/config.json
-        macOS:   /Users/tim/.catlock/config/config.json
+        Windows: C:/Users/Tim/.pawgate/config/config.json
+        Linux:   /home/tim/.pawgate/config/config.json
+        macOS:   /Users/tim/.pawgate/config/config.json
 
     See also:
         - config.py: Main consumer of this function
@@ -130,12 +130,12 @@ def get_config_path() -> str:
     home = str(Path.home())
 
     # Build path to config directory
-    config_dir = os.path.join(home, '.catlock', 'config')
+    config_dir = os.path.join(home, '.pawgate', 'config')
 
     # Create directory if it doesn't exist (first run or manual deletion)
     # WHY exist_ok not used: os.path.exists() check is more explicit
     if not os.path.exists(config_dir):
-        os.makedirs(config_dir)  # Creates .catlock/ and .catlock/config/
+        os.makedirs(config_dir)  # Creates .pawgate/ and .pawgate/config/
 
     # Return full path to config.json
     return os.path.join(config_dir, "config.json")

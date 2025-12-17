@@ -1,6 +1,6 @@
-# KittyLock GitHub Actions Workflows
+# PawGate GitHub Actions Workflows
 
-This directory contains automated CI/CD workflows for KittyLock.
+This directory contains automated CI/CD workflows for PawGate.
 
 ## Workflows
 
@@ -21,12 +21,12 @@ This directory contains automated CI/CD workflows for KittyLock.
 
 - **build**: Creates Windows executable with PyInstaller
   - Only runs if tests pass
-  - Uploads `CatLock.exe` as workflow artifact
+  - Uploads `PawGate.exe` as workflow artifact
   - Shows executable size in workflow summary
 
 **Artifacts:**
 - `coverage-report`: Test coverage XML (30 days retention)
-- `CatLock-{sha}`: Built executable (30 days retention)
+- `PawGate-{sha}`: Built executable (30 days retention)
 
 **Local Simulation:**
 ```bash
@@ -34,7 +34,7 @@ This directory contains automated CI/CD workflows for KittyLock.
 pytest --cov=src --cov-report=term-missing
 
 # Build the same executable locally
-pyinstaller --clean CatLock.spec
+pyinstaller --clean PawGate.spec
 ```
 
 ---
@@ -60,8 +60,8 @@ pyinstaller --clean CatLock.spec
   - Includes installation instructions and security notes
 
 **Release Assets:**
-- `CatLock-{version}.exe`: Windows executable
-- `CatLock-{version}.exe.sha256`: SHA256 checksum file
+- `PawGate-{version}.exe`: Windows executable
+- `PawGate-{version}.exe.sha256`: SHA256 checksum file
 
 **Creating a Release:**
 ```bash
@@ -117,9 +117,9 @@ If tests fail in CI but pass locally:
 
 ### Build Failures
 If PyInstaller build fails:
-1. Verify `CatLock.spec` is up to date
+1. Verify `PawGate.spec` is up to date
 2. Check for missing hidden imports or data files
-3. Test build locally: `pyinstaller --clean CatLock.spec`
+3. Test build locally: `pyinstaller --clean PawGate.spec`
 
 ### Release Not Created
 If tag push doesn't trigger release:

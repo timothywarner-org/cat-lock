@@ -1,7 +1,7 @@
 """
 Unit tests for lockfile_handler module.
 
-WHY: Lockfile handling prevents multiple instances of CatLock from running
+WHY: Lockfile handling prevents multiple instances of PawGate from running
 simultaneously (which would cause keyboard hook conflicts). These tests
 verify the lifecycle: create lockfile, detect stale processes, cleanup.
 
@@ -92,12 +92,12 @@ class TestLockfileHandler(unittest.TestCase):
         """
         Verify check_lockfile terminates old process when lockfile exists.
 
-        WHY: If CatLock crashed previously, its lockfile persists with a
+        WHY: If PawGate crashed previously, its lockfile persists with a
         stale PID. We must kill that old process (if still running) before
         starting our new instance. This prevents zombie processes and
         keyboard hook conflicts.
 
-        Real-world scenario: User force-closes CatLock via Task Manager.
+        Real-world scenario: User force-closes PawGate via Task Manager.
         The lockfile remains with PID 9999. Next launch must clean this up.
 
         Test approach:
@@ -159,7 +159,7 @@ class TestLockfileHandler(unittest.TestCase):
         We MUST catch this and continue, because the goal is just to ensure
         no old instance is running.
 
-        Real-world scenario: CatLock crashed, Windows cleaned up the process,
+        Real-world scenario: PawGate crashed, Windows cleaned up the process,
         but the lockfile persists. os.kill(9999) will fail, but that's fine -
         the old process is already gone!
 
@@ -278,14 +278,14 @@ class TestLockfileHandler(unittest.TestCase):
         Path.home() ensures cross-user compatibility on multi-user systems.
 
         This test verifies the path structure matches the expected pattern:
-        <home_dir>/.catlock/lockfile.lock
+        <home_dir>/.pawgate/lockfile.lock
 
         Note: We avoid module reload with mock which causes test pollution.
         """
         from src.util.lockfile_handler import LOCKFILE_PATH
 
         # Assert - verify path contains expected components
-        self.assertIn('.catlock', LOCKFILE_PATH)
+        self.assertIn('.pawgate', LOCKFILE_PATH)
         self.assertIn('lockfile.lock', LOCKFILE_PATH)
 
         # Verify it uses home directory

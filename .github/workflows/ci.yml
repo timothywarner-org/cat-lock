@@ -1,4 +1,4 @@
-# KittyLock - Continuous Integration Workflow
+# PawGate - Continuous Integration Workflow
 # WHY: Automated testing and building on every push/PR ensures code quality
 # and catches regressions early. Windows-only testing since this is a Windows utility.
 #
@@ -108,24 +108,24 @@ jobs:
         # WHY: Use the existing .spec file for consistent build configuration
         # --clean ensures no stale artifacts from previous builds
         run: |
-          pyinstaller --clean CatLock.spec
+          pyinstaller --clean PawGate.spec
 
       - name: Verify Build Output
         run: |
-          if (Test-Path "dist/CatLock.exe") {
-            Write-Host "Build successful: CatLock.exe created"
-            $size = (Get-Item "dist/CatLock.exe").Length / 1MB
+          if (Test-Path "dist/PawGate.exe") {
+            Write-Host "Build successful: PawGate.exe created"
+            $size = (Get-Item "dist/PawGate.exe").Length / 1MB
             Write-Host "Executable size: $([math]::Round($size, 2)) MB"
           } else {
-            Write-Error "Build failed: CatLock.exe not found"
+            Write-Error "Build failed: PawGate.exe not found"
             exit 1
           }
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: CatLock-${{ github.sha }}
-          path: dist/CatLock.exe
+          name: PawGate-${{ github.sha }}
+          path: dist/PawGate.exe
           retention-days: 30
           if-no-files-found: error
 
@@ -133,8 +133,8 @@ jobs:
         run: |
           echo "### Build Successful" >> $env:GITHUB_STEP_SUMMARY
           echo "" >> $env:GITHUB_STEP_SUMMARY
-          echo "Executable: \`CatLock.exe\`" >> $env:GITHUB_STEP_SUMMARY
-          $size = (Get-Item "dist/CatLock.exe").Length / 1MB
+          echo "Executable: \`PawGate.exe\`" >> $env:GITHUB_STEP_SUMMARY
+          $size = (Get-Item "dist/PawGate.exe").Length / 1MB
           echo "Size: $([math]::Round($size, 2)) MB" >> $env:GITHUB_STEP_SUMMARY
           echo "" >> $env:GITHUB_STEP_SUMMARY
           echo "Download the artifact from the workflow run to test." >> $env:GITHUB_STEP_SUMMARY

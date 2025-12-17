@@ -1,4 +1,4 @@
-# KittyLock - Release Workflow
+# PawGate - Release Workflow
 # WHY: Automated releases on version tags ensure consistent, reproducible builds
 # and eliminate manual upload errors. Creates GitHub releases with auto-generated
 # changelog from commit history.
@@ -68,38 +68,38 @@ jobs:
       - name: Build Production Executable
         # WHY: --clean ensures no dev artifacts leak into production build
         run: |
-          pyinstaller --clean CatLock.spec
+          pyinstaller --clean PawGate.spec
 
       - name: Verify Build and Create Checksum
         shell: pwsh
         run: |
-          if (-not (Test-Path "dist/CatLock.exe")) {
-            Write-Error "Build failed: CatLock.exe not found"
+          if (-not (Test-Path "dist/PawGate.exe")) {
+            Write-Error "Build failed: PawGate.exe not found"
             exit 1
           }
 
-          $size = (Get-Item "dist/CatLock.exe").Length / 1MB
+          $size = (Get-Item "dist/PawGate.exe").Length / 1MB
           Write-Host "Build successful: $([math]::Round($size, 2)) MB"
 
           # WHY: SHA256 checksum for user verification and security
-          $hash = (Get-FileHash "dist/CatLock.exe" -Algorithm SHA256).Hash
-          $hash | Out-File -FilePath "dist/CatLock.exe.sha256" -Encoding ascii
+          $hash = (Get-FileHash "dist/PawGate.exe" -Algorithm SHA256).Hash
+          $hash | Out-File -FilePath "dist/PawGate.exe.sha256" -Encoding ascii
           Write-Host "SHA256: $hash"
 
       - name: Rename Executable with Version
         shell: pwsh
         run: |
           $version = "${{ steps.version.outputs.version }}"
-          Copy-Item "dist/CatLock.exe" "dist/CatLock-$version.exe"
-          Copy-Item "dist/CatLock.exe.sha256" "dist/CatLock-$version.exe.sha256"
+          Copy-Item "dist/PawGate.exe" "dist/PawGate-$version.exe"
+          Copy-Item "dist/PawGate.exe.sha256" "dist/PawGate-$version.exe.sha256"
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: release-build
           path: |
-            dist/CatLock-${{ steps.version.outputs.version }}.exe
-            dist/CatLock-${{ steps.version.outputs.version }}.exe.sha256
+            dist/PawGate-${{ steps.version.outputs.version }}.exe
+            dist/PawGate-${{ steps.version.outputs.version }}.exe.sha256
           retention-days: 90
           if-no-files-found: error
 
@@ -159,8 +159,8 @@ jobs:
 
           ## Installation
 
-          1. Download ``CatLock-$version.exe`` below
-          2. (Optional) Verify the SHA256 checksum against ``CatLock-$version.exe.sha256``
+          1. Download ``PawGate-$version.exe`` below
+          2. (Optional) Verify the SHA256 checksum against ``PawGate-$version.exe.sha256``
           3. Run the executable - no installation required!
           4. Right-click the system tray icon to configure settings
 
@@ -177,7 +177,7 @@ jobs:
 
           **SHA256 Checksum:**
           ``````
-          $(Get-Content "dist/CatLock-$version.exe.sha256")
+          $(Get-Content "dist/PawGate-$version.exe.sha256")
           ``````
 
           ---
@@ -192,13 +192,13 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.version.outputs.tag }}
-          name: KittyLock ${{ steps.version.outputs.version }}
+          name: PawGate ${{ steps.version.outputs.version }}
           body_path: release_notes.md
           draft: false
           prerelease: ${{ contains(steps.version.outputs.tag, 'alpha') || contains(steps.version.outputs.tag, 'beta') || contains(steps.version.outputs.tag, 'rc') }}
           files: |
-            dist/CatLock-${{ steps.version.outputs.version }}.exe
-            dist/CatLock-${{ steps.version.outputs.version }}.exe.sha256
+            dist/PawGate-${{ steps.version.outputs.version }}.exe
+            dist/PawGate-${{ steps.version.outputs.version }}.exe.sha256
           fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -213,7 +213,7 @@ jobs:
           echo "**Tag:** ${{ steps.version.outputs.tag }}" >> $env:GITHUB_STEP_SUMMARY
           echo "" >> $env:GITHUB_STEP_SUMMARY
           echo "**Assets:**" >> $env:GITHUB_STEP_SUMMARY
-          echo "- \`CatLock-$version.exe\`" >> $env:GITHUB_STEP_SUMMARY
-          echo "- \`CatLock-$version.exe.sha256\`" >> $env:GITHUB_STEP_SUMMARY
+          echo "- \`PawGate-$version.exe\`" >> $env:GITHUB_STEP_SUMMARY
+          echo "- \`PawGate-$version.exe.sha256\`" >> $env:GITHUB_STEP_SUMMARY
           echo "" >> $env:GITHUB_STEP_SUMMARY
           echo "View the release: https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }}" >> $env:GITHUB_STEP_SUMMARY

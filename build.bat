@@ -1,9 +1,9 @@
 @echo off
-REM CatLock Build Script for Windows
+REM PawGate Build Script for Windows
 REM This script builds a local executable that won't be blocked by SmartScreen
 
 echo ========================================
-echo CatLock Build Script
+echo PawGate Build Script
 echo ========================================
 echo.
 
@@ -45,7 +45,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo [3/3] Building CatLock executable...
+echo [3/3] Building PawGate executable...
 "%PYTHON%" -m pyinstaller --onefile ^
     --distpath="./dist" ^
     --workpath="./build" ^
@@ -55,7 +55,7 @@ echo [3/3] Building CatLock executable...
     --icon="./resources/img/icon.ico" ^
     --hidden-import plyer.platforms.win.notification ^
     --noconsole ^
-    --name="CatLock" ^
+    --name="PawGate" ^
     "./src/main.py"
 
 if errorlevel 1 (
@@ -70,7 +70,7 @@ echo BUILD SUCCESSFUL!
 echo ========================================
 echo.
 echo Your executable is located at:
-echo   dist\CatLock.exe
+echo   dist\PawGate.exe
 echo.
 echo TIP: If Windows Defender flags it, add the dist folder
 echo      to your exclusions list in Windows Security.

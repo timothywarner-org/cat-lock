@@ -1,4 +1,4 @@
-# Development and Testing Dependencies for KittyLock
+# Development and Testing Dependencies for PawGate
 # WHY: Separate from runtime requirements.txt to keep production builds lean
 # and avoid installing test frameworks on end-user machines.
 

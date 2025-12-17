@@ -5,7 +5,7 @@ This module wraps the `keyboard` library's hotkey functionality with proper
 lifecycle management (start, stop, restart) and thread safety.
 
 The keyboard library (boppreh/keyboard) uses Windows low-level keyboard hooks
-to intercept key events globally, even when CatLock doesn't have focus.
+to intercept key events globally, even when PawGate doesn't have focus.
 
 Threading considerations:
     - keyboard.add_hotkey() is blocking (runs its own event loop)
@@ -44,7 +44,7 @@ class HotkeyListener:
     thread with proper cleanup and state management.
 
     Attributes:
-        main: Reference to CatLockCore instance (provides access to config,
+        main: Reference to PawGateCore instance (provides access to config,
               queues, and callbacks)
 
     WHY pass main instance:
@@ -63,7 +63,7 @@ class HotkeyListener:
         Initialize hotkey listener with reference to main application.
 
         Args:
-            main: CatLockCore instance that owns this listener
+            main: PawGateCore instance that owns this listener
         """
         self.main = main
 

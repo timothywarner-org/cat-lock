@@ -1,6 +1,6 @@
-# CatLock Architecture
+# PawGate Architecture
 
-This document provides a technical deep-dive into CatLock's architecture, threading model, data flow, and key design decisions.
+This document provides a technical deep-dive into PawGate's architecture, threading model, data flow, and key design decisions.
 
 ## Table of Contents
 - [System Overview](#system-overview)
@@ -16,7 +16,7 @@ This document provides a technical deep-dive into CatLock's architecture, thread
 
 ## System Overview
 
-CatLock is a Windows-only keyboard locking utility built in Python. It runs as a background system tray application that blocks all keyboard input on demand via a configurable hotkey (default: Ctrl+L).
+PawGate is a Windows-only keyboard locking utility built in Python. It runs as a background system tray application that blocks all keyboard input on demand via a configurable hotkey (default: Ctrl+L).
 
 **Core Capabilities:**
 - Global hotkey registration (monitors system-wide key presses)
@@ -37,7 +37,7 @@ CatLock is a Windows-only keyboard locking utility built in Python. It runs as a
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                           CatLock Application                        │
+│                           PawGate Application                        │
 └─────────────────────────────────────────────────────────────────────┘
          │
          │ Spawns 4 concurrent threads
@@ -126,7 +126,7 @@ Main thread resumes event loop polling
 
 ## Threading Model
 
-CatLock uses a multi-threaded architecture to handle concurrent concerns:
+PawGate uses a multi-threaded architecture to handle concurrent concerns:
 
 ### Thread 1: Main Thread (Event Loop)
 
@@ -402,7 +402,7 @@ Windows lock/unlock events can cause Right Ctrl to "stick" in pressed state. The
 
 ### 6. Why Single-Instance via Lockfile (Not Mutex)?
 
-**Decision:** Use a PID lockfile at `~/.catlock/lockfile.lock`.
+**Decision:** Use a PID lockfile at `~/.pawgate/lockfile.lock`.
 
 **WHY:**
 - Simple to implement (just file I/O)
@@ -428,7 +428,7 @@ with open(LOCKFILE_PATH, 'w') as f:
 
 ### 7. Why JSON Config (Not TOML/YAML)?
 
-**Decision:** Store config as JSON in `~/.catlock/config/config.json`.
+**Decision:** Store config as JSON in `~/.pawgate/config/config.json`.
 
 **WHY:**
 - Standard library support (no dependencies)
@@ -500,16 +500,16 @@ pyinstaller --onefile \
 
 ### File Location
 
-Config stored at: `%USERPROFILE%\.catlock\config\config.json`
+Config stored at: `%USERPROFILE%\.pawgate\config\config.json`
 
-Example path: `C:\Users\Tim\.catlock\config\config.json`
+Example path: `C:\Users\Tim\.pawgate\config\config.json`
 
 ### Configuration Loading Logic
 
 ```python
 def load():
     # 1. Check for dev mode flags
-    if '--reset-config' in sys.argv or os.environ.get('CATLOCK_DEV'):
+    if '--reset-config' in sys.argv or os.environ.get('PAWGATE_DEV'):
         # Delete existing config, copy from bundled defaults
         shutil.copy(bundled_config, user_config)
         return json.load(user_config)
@@ -575,7 +575,7 @@ def set_opacity(self, opacity: float) -> None:
 
 ### PyInstaller Spec File
 
-The `CatLock.spec` file controls the build:
+The `PawGate.spec` file controls the build:
 
 ```python
 # Key options:
@@ -606,7 +606,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='CatLock',
+    name='PawGate',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -657,16 +657,16 @@ image = Image.open(icon_path)
 
 2. **Build executable:**
    ```bash
-   pyinstaller CatLock.spec
+   pyinstaller PawGate.spec
    ```
 
 3. **Output:**
-   - Executable: `dist/CatLock.exe` (~15 MB)
+   - Executable: `dist/PawGate.exe` (~15 MB)
    - Build artifacts: `build/` (can be deleted)
 
 4. **Testing:**
    ```bash
-   dist/CatLock.exe
+   dist/PawGate.exe
    ```
 
 ### Common Build Issues
@@ -734,7 +734,7 @@ See `PORTING.md` for detailed C# migration guide.
 
 ## Conclusion
 
-CatLock's architecture prioritizes:
+PawGate's architecture prioritizes:
 1. **Simplicity** - Easy to understand, maintain, and extend
 2. **Reliability** - Graceful error handling, defensive programming
 3. **Responsiveness** - Non-blocking UI, fast hotkey response

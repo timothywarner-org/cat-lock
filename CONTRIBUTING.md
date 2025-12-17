@@ -1,6 +1,6 @@
-# Contributing to CatLock
+# Contributing to PawGate
 
-Thank you for your interest in contributing to CatLock! This guide will help you get started.
+Thank you for your interest in contributing to PawGate! This guide will help you get started.
 
 ## Table of Contents
 - [Development Setup](#development-setup)
@@ -16,7 +16,7 @@ Thank you for your interest in contributing to CatLock! This guide will help you
 ### Prerequisites
 
 - **Python 3.11+** (3.12 recommended)
-- **Windows OS** (required - CatLock uses Windows-specific keyboard APIs)
+- **Windows OS** (required - PawGate uses Windows-specific keyboard APIs)
 - **Git** for version control
 - **Visual Studio Code** (recommended, config included)
 
@@ -24,8 +24,8 @@ Thank you for your interest in contributing to CatLock! This guide will help you
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/cat-lock.git
-   cd cat-lock
+   git clone https://github.com/YOUR_USERNAME/pawgate.git
+   cd pawgate
    ```
 
 2. **Create a virtual environment**
@@ -59,23 +59,23 @@ Thank you for your interest in contributing to CatLock! This guide will help you
    python src/main.py
    ```
 
-   You should see the CatLock icon appear in your system tray.
+   You should see the PawGate icon appear in your system tray.
 
 ### Running in Development Mode
 
-**WHY development mode?** Use the `CATLOCK_DEV` environment variable to reset configuration to defaults on every launch. This prevents your personal config from interfering with testing.
+**WHY development mode?** Use the `PAWGATE_DEV` environment variable to reset configuration to defaults on every launch. This prevents your personal config from interfering with testing.
 
 ```bash
 # Windows Command Prompt
-set CATLOCK_DEV=1
+set PAWGATE_DEV=1
 python src/main.py
 
 # Windows PowerShell
-$env:CATLOCK_DEV=1
+$env:PAWGATE_DEV=1
 python src/main.py
 
 # Git Bash
-CATLOCK_DEV=1 python src/main.py
+PAWGATE_DEV=1 python src/main.py
 ```
 
 Or use the `--reset-config` flag:
@@ -91,12 +91,12 @@ Use the provided build script to create an executable:
 build.bat
 ```
 
-Output will be in `dist/CatLock.exe`.
+Output will be in `dist/PawGate.exe`.
 
 **Manual build:**
 ```bash
 pip install pyinstaller
-pyinstaller CatLock.spec
+pyinstaller PawGate.spec
 ```
 
 ---
@@ -223,7 +223,7 @@ from src.util.path_util import get_packaged_path
 
 ### Naming Conventions
 
-- **Classes:** `PascalCase` (e.g., `CatLockCore`, `HotkeyListener`)
+- **Classes:** `PascalCase` (e.g., `PawGateCore`, `HotkeyListener`)
 - **Functions/methods:** `snake_case` (e.g., `lock_keyboard`, `send_hotkey_signal`)
 - **Constants:** `UPPER_SNAKE_CASE` (e.g., `DEFAULT_HOTKEY`, `LOCKFILE_PATH`)
 - **Private members:** `_leading_underscore` (e.g., `_internal_helper`)
@@ -516,9 +516,9 @@ Relates to #456
 Understanding the codebase organization:
 
 ```
-cat-lock/
+pawgate/
 ├── src/
-│   ├── main.py                      # Entry point, CatLockCore class
+│   ├── main.py                      # Entry point, PawGateCore class
 │   ├── config/
 │   │   ├── __init__.py
 │   │   └── config.py                # JSON config management
@@ -550,7 +550,7 @@ cat-lock/
 │   └── config/
 │       └── config.json              # Default configuration
 ├── build.bat                        # Windows build script
-├── CatLock.spec                     # PyInstaller configuration
+├── PawGate.spec                     # PyInstaller configuration
 ├── requirements.txt                 # Runtime dependencies
 ├── requirements-dev.txt             # Development dependencies
 └── pytest.ini                       # Test configuration
@@ -578,10 +578,10 @@ cat-lock/
 
 ## License
 
-By contributing to CatLock, you agree that your contributions will be licensed under the same license as the project (see LICENSE file).
+By contributing to PawGate, you agree that your contributions will be licensed under the same license as the project (see LICENSE file).
 
 ---
 
-**Thank you for contributing to CatLock!**
+**Thank you for contributing to PawGate!**
 
 Remember: Good code is code that's easy to understand, maintain, and extend. When in doubt, prioritize clarity over cleverness.

@@ -1,6 +1,6 @@
-# CatLock C# Porting Guide
+# PawGate C# Porting Guide
 
-This document provides a comprehensive guide for porting CatLock from Python to C# for potential integration into Microsoft PowerToys.
+This document provides a comprehensive guide for porting PawGate from Python to C# for potential integration into Microsoft PowerToys.
 
 ## Table of Contents
 - [Why Port to C#](#why-port-to-c)
@@ -53,7 +53,7 @@ This document provides a comprehensive guide for porting CatLock from Python to 
 
 | Python Component | C# Equivalent | Implementation |
 |------------------|---------------|----------------|
-| `CatLockCore` main class | `CatLockManager` service | Singleton service managed by PowerToys |
+| `PawGateCore` main class | `PawGateManager` service | Singleton service managed by PowerToys |
 | Thread-based concurrency | Async/await with `Task` | C# best practice is async over explicit threads |
 | `Queue` for signaling | `Channel<T>` or events | More idiomatic: use C# events or reactive extensions |
 | Lockfile PID check | Named Mutex | `System.Threading.Mutex` for single instance |
@@ -123,7 +123,7 @@ NotifyIcon trayIcon = new NotifyIcon
 {
     Icon = new Icon("icon.ico"),
     Visible = true,
-    Text = "CatLock"
+    Text = "PawGate"
 };
 
 ContextMenuStrip menu = new ContextMenuStrip();
@@ -134,7 +134,7 @@ menu.Items.Add("Exit", null, OnExit);
 trayIcon.ContextMenuStrip = menu;
 ```
 
-**Note:** PowerToys has its own tray icon - CatLock would be a module within it, not standalone.
+**Note:** PowerToys has its own tray icon - PawGate would be a module within it, not standalone.
 
 ### 3. Overlay Window
 
@@ -208,7 +208,7 @@ public void ShowToast(string message)
         <toast>
             <visual>
                 <binding template='ToastGeneric'>
-                    <text>CatLock</text>
+                    <text>PawGate</text>
                     <text>{message}</text>
                 </binding>
             </visual>
@@ -218,7 +218,7 @@ public void ShowToast(string message)
     doc.LoadXml(toastXml);
 
     ToastNotification toast = new ToastNotification(doc);
-    ToastNotificationManager.CreateToastNotifier("CatLock").Show(toast);
+    ToastNotificationManager.CreateToastNotifier("PawGate").Show(toast);
 }
 ```
 
@@ -230,16 +230,16 @@ public void ShowToast(string message)
 ```csharp
 using System.Text.Json;
 
-public class CatLockSettings
+public class PawGateSettings
 {
     public string Hotkey { get; set; } = "Ctrl+L";
     public double Opacity { get; set; } = 0.3;
     public bool NotificationsEnabled { get; set; } = false;
 
-    public static CatLockSettings Load(string path)
+    public static PawGateSettings Load(string path)
     {
         string json = File.ReadAllText(path);
-        return JsonSerializer.Deserialize<CatLockSettings>(json);
+        return JsonSerializer.Deserialize<PawGateSettings>(json);
     }
 
     public void Save(string path)
@@ -267,7 +267,7 @@ PowerToys/
 │   ├── modules/
 │   │   ├── FancyZones/      # Example module
 │   │   ├── PowerRename/     # Example module
-│   │   └── CatLock/         # New module (your port)
+│   │   └── PawGate/         # New module (your port)
 │   ├── settings-ui/         # Unified settings interface
 │   └── common/              # Shared utilities
 └── installer/               # MSI installer
@@ -278,19 +278,19 @@ PowerToys/
 Each PowerToys module follows this structure:
 
 ```
-src/modules/CatLock/
-├── CatLock/
-│   ├── CatLockManager.cs       # Main service (IAsyncDisposable)
+src/modules/PawGate/
+├── PawGate/
+│   ├── PawGateManager.cs       # Main service (IAsyncDisposable)
 │   ├── KeyboardHook.cs         # Low-level keyboard hooking
 │   ├── OverlayWindow.xaml      # WinUI overlay window
 │   ├── OverlayWindow.xaml.cs   # Overlay code-behind
 │   └── Settings.cs             # Settings model
-├── CatLockSettingsUI/
+├── PawGateSettingsUI/
 │   ├── Views/
 │   │   └── SettingsPage.xaml   # Settings UI (appears in PowerToys settings)
 │   └── ViewModels/
 │       └── SettingsViewModel.cs
-└── CatLock.Tests/
+└── PawGate.Tests/
     └── UnitTests.cs
 ```
 
@@ -307,16 +307,16 @@ public interface IModule
     void Destroy();
 }
 
-public class CatLockModule : IModule
+public class PawGateModule : IModule
 {
-    private CatLockManager _manager;
+    private PawGateManager _manager;
 
-    public string Name => "CatLock";
+    public string Name => "PawGate";
     public bool IsEnabled { get; private set; }
 
     public void Enable()
     {
-        _manager = new CatLockManager();
+        _manager = new PawGateManager();
         _manager.Start();
         IsEnabled = true;
     }
@@ -340,7 +340,7 @@ PowerToys uses a centralized settings system:
 
 ```csharp
 // Define settings schema
-public class CatLockSettings
+public class PawGateSettings
 {
     public HotkeySettings Hotkey { get; set; }
     public int Opacity { get; set; } = 30; // 0-100 scale for UI
@@ -348,22 +348,22 @@ public class CatLockSettings
 }
 
 // Register with settings provider
-public class CatLockModule : IModule
+public class PawGateModule : IModule
 {
     private ISettingsUtils _settingsUtils;
 
-    public CatLockModule(ISettingsUtils settingsUtils)
+    public PawGateModule(ISettingsUtils settingsUtils)
     {
         _settingsUtils = settingsUtils;
     }
 
     public void LoadSettings()
     {
-        var settings = _settingsUtils.GetSettings<CatLockSettings>(Name);
+        var settings = _settingsUtils.GetSettings<PawGateSettings>(Name);
         ApplySettings(settings);
     }
 
-    public void SaveSettings(CatLockSettings settings)
+    public void SaveSettings(PawGateSettings settings)
     {
         _settingsUtils.SaveSettings(settings.ToJsonString(), Name);
     }
@@ -376,12 +376,12 @@ PowerToys settings UI is WinUI 3 XAML:
 
 ```xaml
 <Page
-    x:Class="CatLockSettingsUI.Views.SettingsPage"
+    x:Class="PawGateSettingsUI.Views.SettingsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <StackPanel Spacing="8">
-        <TextBlock Text="CatLock Settings" Style="{StaticResource SubtitleTextBlockStyle}" />
+        <TextBlock Text="PawGate Settings" Style="{StaticResource SubtitleTextBlockStyle}" />
 
         <!-- Hotkey Picker -->
         <controls:HotkeySettingsCard
@@ -582,7 +582,7 @@ Embedded resources in .NET assembly:
 // Add icon to project as Embedded Resource
 // Access it at runtime:
 using (Stream stream = Assembly.GetExecutingAssembly()
-    .GetManifestResourceStream("CatLock.Resources.icon.ico"))
+    .GetManifestResourceStream("PawGate.Resources.icon.ico"))
 {
     Icon icon = new Icon(stream);
 }
@@ -590,7 +590,7 @@ using (Stream stream = Assembly.GetExecutingAssembly()
 
 Or use MSBuild content files:
 ```xml
-<!-- CatLock.csproj -->
+<!-- PawGate.csproj -->
 <ItemGroup>
   <Content Include="Resources\icon.ico">
     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -644,7 +644,7 @@ string iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources
 3. **Background inference** (async, GPU-accelerated if available)
 4. **Auto-lock on detection**
 
-**Deliverable:** Full "KittyLock" experience with automatic cat detection.
+**Deliverable:** Full automatic cat detection experience.
 
 ---
 
@@ -833,15 +833,15 @@ public class OverlayWindow : Window
 using System;
 using System.Threading.Tasks;
 
-public class CatLockManager : IDisposable
+public class PawGateManager : IDisposable
 {
     private readonly KeyboardBlocker _keyboardBlocker;
     private OverlayWindow _overlay;
     private HotKeyManager _hotKeyManager;
-    private CatLockSettings _settings;
+    private PawGateSettings _settings;
     private bool _isLocked = false;
 
-    public CatLockManager(CatLockSettings settings)
+    public PawGateManager(PawGateSettings settings)
     {
         _settings = settings;
         _keyboardBlocker = new KeyboardBlocker();
@@ -959,7 +959,7 @@ public class CatLockManager : IDisposable
 
 ## Conclusion
 
-Porting CatLock to C# for PowerToys integration is a significant undertaking but achievable with careful planning. The key challenges are:
+Porting PawGate to C# for PowerToys integration is a significant undertaking but achievable with careful planning. The key challenges are:
 
 1. Replacing `keyboard` library with low-level Windows hooks
 2. Adapting to async/await patterns instead of explicit threads

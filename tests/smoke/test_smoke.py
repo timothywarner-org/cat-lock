@@ -1,5 +1,5 @@
 """
-Smoke tests for CatLock - verify basic functionality works.
+Smoke tests for PawGate - verify basic functionality works.
 
 WHY: Smoke tests are the first line of defense against broken builds.
 They catch import errors, basic instantiation failures, and environment
@@ -15,7 +15,7 @@ import pytest
 
 def test_imports_succeed():
     """
-    Verify all core CatLock modules can be imported without errors.
+    Verify all core PawGate modules can be imported without errors.
 
     WHY: Import failures indicate missing dependencies, syntax errors,
     or circular import issues. This test catches these immediately
@@ -87,7 +87,7 @@ def test_imports_succeed():
         pytest.fail(f"Failed to import src.util.web_browser_util: {e}")
 
 
-def test_catlock_core_initializes(
+def test_pawgate_core_initializes(
     mock_keyboard,
     mock_tray_icon,
     mock_overlay_window,
@@ -98,7 +98,7 @@ def test_catlock_core_initializes(
     mock_open_about
 ):
     """
-    Verify CatLockCore can be instantiated without errors.
+    Verify PawGateCore can be instantiated without errors.
 
     WHY: Even with all dependencies mocked, initialization could fail due to:
     - Constructor logic errors
@@ -121,7 +121,7 @@ def test_catlock_core_initializes(
     """
     # WHY: Import here after mocks are active to prevent side effects
     # during module load time
-    from src.main import CatLockCore
+    from src.main import PawGateCore
 
     # WHY: Instantiation itself exercises significant initialization logic:
     # - Config loading and parsing
@@ -129,17 +129,17 @@ def test_catlock_core_initializes(
     # - Queue initialization
     # - Lock object creation
     try:
-        core = CatLockCore()
+        core = PawGateCore()
     except Exception as e:
-        pytest.fail(f"CatLockCore initialization failed: {e}")
+        pytest.fail(f"PawGateCore initialization failed: {e}")
 
     # WHY: Verify critical attributes exist and have correct types
     # These are needed for the application to function
-    assert hasattr(core, 'config'), "CatLockCore missing 'config' attribute"
-    assert hasattr(core, 'hotkey_thread'), "CatLockCore missing 'hotkey_thread' attribute"
-    assert hasattr(core, 'show_overlay_queue'), "CatLockCore missing 'show_overlay_queue' attribute"
-    assert hasattr(core, 'program_running'), "CatLockCore missing 'program_running' attribute"
-    assert hasattr(core, 'blocked_keys'), "CatLockCore missing 'blocked_keys' attribute"
+    assert hasattr(core, 'config'), "PawGateCore missing 'config' attribute"
+    assert hasattr(core, 'hotkey_thread'), "PawGateCore missing 'hotkey_thread' attribute"
+    assert hasattr(core, 'show_overlay_queue'), "PawGateCore missing 'show_overlay_queue' attribute"
+    assert hasattr(core, 'program_running'), "PawGateCore missing 'program_running' attribute"
+    assert hasattr(core, 'blocked_keys'), "PawGateCore missing 'blocked_keys' attribute"
 
     # WHY: Verify initial state is correct
     assert core.program_running is True, "program_running should start as True"
@@ -149,4 +149,4 @@ def test_catlock_core_initializes(
     # NOTE: We don't assert mock_hotkey_listener.assert_called_once() because
     # Python's import caching makes it difficult to mock classes that are
     # imported with 'from X import Y' syntax at the correct timing.
-    # The key test here is that CatLockCore can be instantiated without errors.
+    # The key test here is that PawGateCore can be instantiated without errors.

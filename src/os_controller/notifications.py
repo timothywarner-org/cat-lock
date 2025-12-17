@@ -6,7 +6,7 @@ to inform users that the keyboard has been locked.
 
 Notification strategy:
     - Appears in Windows Action Center (bottom-right on most systems)
-    - Shows CatLock icon for brand recognition
+    - Shows PawGate icon for brand recognition
     - Brief message: "Keyboard Locked - Click on screen to unlock"
     - Auto-dismisses after 3 seconds (doesn't clutter Action Center)
 
@@ -27,7 +27,7 @@ WHY timeout=3:
     is enough time for users to notice, but brief enough to not be annoying.
 
 WHY app_icon:
-    Branded notifications with the CatLock icon help users identify the
+    Branded notifications with the PawGate icon help users identify the
     source, especially if multiple apps send notifications.
 
 Alternatives considered:
@@ -55,10 +55,10 @@ def send_lock_notification() -> None:
     Display a Windows toast notification that keyboard is locked.
 
     This shows a system notification with:
-    - App name: "CatLock"
+    - App name: "PawGate"
     - Title: "Keyboard Locked"
     - Message: "Click on screen to unlock"
-    - Icon: CatLock icon (for brand recognition)
+    - Icon: PawGate icon (for brand recognition)
     - Timeout: 3 seconds (auto-dismiss)
 
     WHY brief sleep after notify:
@@ -82,10 +82,10 @@ def send_lock_notification() -> None:
     # Send Windows toast notification
     # WHY .ico file: Windows notifications prefer .ico format for consistency
     plyer.notification.notify(
-        app_name="CatLock",  # Shows in notification header
+        app_name="PawGate",  # Shows in notification header
         title="Keyboard Locked",  # Bold text in notification
         message="Click on screen to unlock",  # Body text with unlock instructions
-        app_icon=get_packaged_path(path),  # CatLock icon for branding
+        app_icon=get_packaged_path(path),  # PawGate icon for branding
         timeout=3,  # Auto-dismiss after 3 seconds
     )
 

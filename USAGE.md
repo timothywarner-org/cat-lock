@@ -1,10 +1,10 @@
-# CatLock User Guide
+# PawGate User Guide
 
 ## Quick Start
 
-1. **Launch CatLock** - Double-click `CatLock.exe` or run the application
+1. **Launch PawGate** - Double-click `PawGate.exe` or run the application
 2. **Look for the system tray icon** - A small cat icon will appear in your Windows system tray (near the clock)
-3. **The app runs in the background** - No visible window opens. CatLock waits for you to trigger the lock
+3. **The app runs in the background** - No visible window opens. PawGate waits for you to trigger the lock
 
 That's it! The application is now running and ready to protect your keyboard.
 
@@ -69,14 +69,14 @@ If you prefer hotkey-only unlock, this may be configurable in future versions.
 
 ### Never Get Locked Out
 
-**Ctrl + Alt + Del ALWAYS works** - This is a Windows operating system feature that CANNOT be blocked by any application, including CatLock.
+**Ctrl + Alt + Del ALWAYS works** - This is a Windows operating system feature that CANNOT be blocked by any application, including PawGate.
 
 If you ever need to escape:
 
 1. **Press Ctrl + Alt + Del** - This brings up the Windows security screen
 2. **Choose an option:**
-   - **Sign out** - Logs you out of Windows (closes CatLock)
-   - **Task Manager** - End the CatLock process
+   - **Sign out** - Logs you out of Windows (closes PawGate)
+   - **Task Manager** - End the PawGate process
    - **Lock** - Locks Windows (different from keyboard lock)
    - **Restart** - Restarts your computer
    - **Press Escape** - Returns to your locked session
@@ -91,7 +91,7 @@ Press CTRL + L to unlock or click anywhere
 If you still can't unlock:
 1. **Click anywhere on the screen** - The easiest unlock method
 2. Use **Ctrl + Alt + Del** (see above)
-3. Or right-click the **CatLock system tray icon** and select **Quit** (this unlocks automatically)
+3. Or right-click the **PawGate system tray icon** and select **Quit** (this unlocks automatically)
 
 ### Other OS Hotkeys That Work
 
@@ -106,11 +106,11 @@ These Windows shortcuts cannot be blocked (by design):
 
 ### Finding the Icon
 
-Look in your Windows system tray (bottom-right corner, near the clock). If you don't see the CatLock icon, click the up-arrow to show hidden icons.
+Look in your Windows system tray (bottom-right corner, near the clock). If you don't see the PawGate icon, click the up-arrow to show hidden icons.
 
 ### Menu Options
 
-Right-click the CatLock icon to access:
+Right-click the PawGate icon to access:
 
 #### Lock Keyboard
 Triggers the keyboard lock immediately (same as pressing the hotkey).
@@ -134,11 +134,11 @@ Adjust how dark the lock overlay appears. Options:
 
 #### About
 - **Help** - Opens documentation
-- **About** - Information about CatLock
+- **About** - Information about PawGate
 - **Support** - Buy the developer a coffee
 
 #### Quit
-Closes CatLock completely. If the keyboard is currently locked, it will unlock automatically before quitting.
+Closes PawGate completely. If the keyboard is currently locked, it will unlock automatically before quitting.
 
 ---
 
@@ -146,9 +146,9 @@ Closes CatLock completely. If the keyboard is currently locked, it will unlock a
 
 ### Config File Location
 
-CatLock stores your settings in:
+PawGate stores your settings in:
 ```
-C:\Users\YourUsername\.catlock\config\config.json
+C:\Users\YourUsername\.pawgate\config\config.json
 ```
 
 Where `YourUsername` is your Windows username.
@@ -210,7 +210,7 @@ Whether to show Windows toast notifications when locking.
 ### Applying Configuration Changes
 
 1. **Edit `config.json`** and save your changes
-2. **Restart CatLock** - Quit from the system tray menu and launch again
+2. **Restart PawGate** - Quit from the system tray menu and launch again
 3. Your new settings will be loaded
 
 **TIP:** Most users never need to edit this file directly - the system tray menu provides easier access to common settings.
@@ -222,8 +222,8 @@ Whether to show Windows toast notifications when locking.
 ### "I can't unlock the keyboard!"
 
 **Solution 1:** Press **Ctrl + Alt + Del**
-- This ALWAYS works regardless of CatLock's state
-- Choose Task Manager and end the CatLock process
+- This ALWAYS works regardless of PawGate's state
+- Choose Task Manager and end the PawGate process
 - Or sign out/restart
 
 **Solution 2:** Check the on-screen instructions
@@ -231,7 +231,7 @@ Whether to show Windows toast notifications when locking.
 - Make sure you're pressing all keys simultaneously
 
 **Solution 3:** Use the system tray
-- Right-click the CatLock icon
+- Right-click the PawGate icon
 - Select "Quit" (this unlocks automatically)
 
 ### "The hotkey isn't working"
@@ -251,7 +251,7 @@ Whether to show Windows toast notifications when locking.
    - Try a different hotkey combination
 
 **Test your hotkey:**
-- Launch CatLock
+- Launch PawGate
 - Press your hotkey - the overlay should appear
 - Click the overlay or press hotkey again - the overlay should disappear
 
@@ -273,36 +273,36 @@ This is expected behavior for OS-level hotkeys that Windows reserves:
 - Multimedia keys
 - Arrow keys, Page Up/Down, etc.
 
-### "CatLock won't start" or "Multiple instances running"
+### "PawGate won't start" or "Multiple instances running"
 
-CatLock prevents multiple copies from running simultaneously using a lockfile.
+PawGate prevents multiple copies from running simultaneously using a lockfile.
 
 **Solution:**
 1. Check Task Manager (Ctrl + Shift + Esc)
-2. Look for any running CatLock processes
+2. Look for any running PawGate processes
 3. End them
-4. Delete the lockfile: `C:\Users\YourUsername\.catlock\catlock.lock`
-5. Launch CatLock again
+4. Delete the lockfile: `C:\Users\YourUsername\.pawgate\pawgate.lock`
+5. Launch PawGate again
 
-### "Windows Defender blocked CatLock"
+### "Windows Defender blocked PawGate"
 
-If you built CatLock locally or downloaded it, Windows SmartScreen may flag it as unknown.
+If you built PawGate locally or downloaded it, Windows SmartScreen may flag it as unknown.
 
 **Solution:**
 1. Open **Windows Security**
 2. Go to **Virus & threat protection > Protection history**
-3. Find the CatLock entry
+3. Find the PawGate entry
 4. Select **Allow on device**
 
-**Alternative:** Add the `dist` folder (or wherever CatLock.exe is) to Windows Defender exclusions.
+**Alternative:** Add the `dist` folder (or wherever PawGate.exe is) to Windows Defender exclusions.
 
 ### "The overlay doesn't cover all my monitors"
 
-CatLock automatically detects all connected monitors and spans the overlay across them.
+PawGate automatically detects all connected monitors and spans the overlay across them.
 
 **If this isn't working:**
 1. Make sure your monitors are properly configured in Windows Display Settings
-2. Restart CatLock after changing monitor configuration
+2. Restart PawGate after changing monitor configuration
 3. Check for Windows updates (multi-monitor support has improved in recent versions)
 
 ### "Notifications aren't showing"
@@ -310,18 +310,18 @@ CatLock automatically detects all connected monitors and spans the overlay acros
 **Check Windows notification settings:**
 1. Open **Windows Settings > System > Notifications**
 2. Ensure notifications are enabled globally
-3. Scroll down and verify notifications are allowed for CatLock
+3. Scroll down and verify notifications are allowed for PawGate
 
-**Also check:** The CatLock system tray menu - notifications may be disabled there.
+**Also check:** The PawGate system tray menu - notifications may be disabled there.
 
-### "CatLock is using too much CPU/memory"
+### "PawGate is using too much CPU/memory"
 
-CatLock is designed to be extremely lightweight (< 50 MB RAM, minimal CPU when idle).
+PawGate is designed to be extremely lightweight (< 50 MB RAM, minimal CPU when idle).
 
 **If you're seeing high resource usage:**
-1. Check Task Manager for the actual CatLock process
+1. Check Task Manager for the actual PawGate process
 2. Ensure you don't have multiple instances running
-3. Try restarting CatLock
+3. Try restarting PawGate
 4. Check for conflicts with keyboard monitoring software
 
 ---
@@ -362,11 +362,11 @@ CatLock is designed to be extremely lightweight (< 50 MB RAM, minimal CPU when i
 
 Currently, the overlay is a semi-transparent black screen with centered text. Opacity is configurable, but colors and text cannot be changed without modifying the source code.
 
-### Does CatLock work with virtual machines?
+### Does PawGate work with virtual machines?
 
 When running inside a VM, keyboard blocking works within the VM only. Host OS hotkeys (like Ctrl + Alt + Del on the host) are not affected.
 
-### Can I use CatLock to protect against toddlers/kids?
+### Can I use PawGate to protect against toddlers/kids?
 
 Yes! The keyboard lock works for any accidental input. However:
 - Toddlers can unlock by clicking the screen (this is by design for quick adult unlock)
@@ -376,26 +376,26 @@ Yes! The keyboard lock works for any accidental input. However:
 
 ### Does this drain my laptop battery?
 
-No. CatLock uses negligible CPU and battery when idle (not locked). Even when locked, resource usage is minimal.
+No. PawGate uses negligible CPU and battery when idle (not locked). Even when locked, resource usage is minimal.
 
-### Can I run CatLock on startup?
+### Can I run PawGate on startup?
 
-Yes! Add CatLock to your Windows startup folder:
+Yes! Add PawGate to your Windows startup folder:
 1. Press **Windows + R**
 2. Type `shell:startup` and press Enter
-3. Create a shortcut to CatLock.exe in this folder
+3. Create a shortcut to PawGate.exe in this folder
 
-### Will CatLock interfere with games or full-screen apps?
+### Will PawGate interfere with games or full-screen apps?
 
-No, when CatLock is NOT locked, it has zero impact on other applications. When locked, it blocks all keyboard input including to games.
+No, when PawGate is NOT locked, it has zero impact on other applications. When locked, it blocks all keyboard input including to games.
 
-### Can CatLock lock my mouse too?
+### Can PawGate lock my mouse too?
 
-No. CatLock only blocks keyboard input. The mouse remains fully functional and clicking anywhere unlocks the keyboard. This is intentional for quick human unlock.
+No. PawGate only blocks keyboard input. The mouse remains fully functional and clicking anywhere unlocks the keyboard. This is intentional for quick human unlock.
 
-### Is CatLock safe?
+### Is PawGate safe?
 
-Yes. CatLock:
+Yes. PawGate:
 - Does not collect or transmit any data
 - Does not modify system files
 - Uses only documented Windows APIs
@@ -418,15 +418,15 @@ Yes. CatLock:
 
 **You can NEVER be locked out of your system.**
 
-Ctrl + Alt + Del ALWAYS works, regardless of CatLock's state. This is a Windows operating system guarantee that no application can override.
+Ctrl + Alt + Del ALWAYS works, regardless of PawGate's state. This is a Windows operating system guarantee that no application can override.
 
 If you ever feel stuck:
 1. Press **Ctrl + Alt + Del**
 2. Choose **Task Manager**
-3. End the **CatLock** process
+3. End the **PawGate** process
 
 Your keyboard will immediately unlock.
 
 ---
 
-*CatLock - Because Fiona doesn't understand `git commit --amend`*
+*PawGate - Because Fiona doesn't understand `git commit --amend`*

@@ -16,4 +16,8 @@
 
 - Add an option to lock on screensaver start
 
+- add code coverage badge to README
+
+- add build badges to README
+
 

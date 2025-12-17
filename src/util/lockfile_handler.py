@@ -1,7 +1,7 @@
 """
-Lockfile Handler - Enforce single instance of CatLock.
+Lockfile Handler - Enforce single instance of PawGate.
 
-This module ensures only one instance of CatLock runs at a time by using a
+This module ensures only one instance of PawGate runs at a time by using a
 lockfile that stores the process ID (PID) of the running instance.
 
 Single instance enforcement strategy:
@@ -17,10 +17,10 @@ WHY single instance:
     - Wasted system resources (memory, CPU for duplicate event loops)
 
 Lockfile location:
-    ~/.catlock/lockfile.lock (same directory as config)
+    ~/.pawgate/lockfile.lock (same directory as config)
 
 WHY store PID in lockfile:
-    If an old CatLock instance crashed without cleanup, the lockfile remains.
+    If an old PawGate instance crashed without cleanup, the lockfile remains.
     We try to terminate the old process (gracefully) before starting. If the
     PID is stale (process doesn't exist), we just overwrite the lockfile.
 
@@ -44,14 +44,14 @@ import signal
 from pathlib import Path
 
 # Lockfile path in user's home directory
-# WHY same directory as config: Keeps all CatLock user data together
+# WHY same directory as config: Keeps all PawGate user data together
 home = str(Path.home())
-LOCKFILE_PATH = os.path.join(home, '.catlock', 'lockfile.lock')
+LOCKFILE_PATH = os.path.join(home, '.pawgate', 'lockfile.lock')
 
 
 def check_lockfile():
     """
-    Check for existing CatLock instance and create lockfile for current instance.
+    Check for existing PawGate instance and create lockfile for current instance.
 
     This function:
     1. Checks if lockfile exists (indicates another instance is/was running)

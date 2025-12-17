@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-CatLock is a Windows-only keyboard locking utility that prevents accidental input (e.g., from pets). It runs in the system tray and uses a hotkey (default: Ctrl+L) to toggle keyboard lock. When locked, a semi-transparent overlay appears across all monitors. Unlocking is via mouse click or pressing the hotkey again.
+PawGate is a Windows-only keyboard locking utility that prevents accidental input (e.g., from pets). It runs in the system tray and uses a hotkey (default: Ctrl+L) to toggle keyboard lock. When locked, a semi-transparent overlay appears across all monitors. Unlocking is via mouse click or pressing the hotkey again.
 
 **Future goal**: Port to C# for potential inclusion in Microsoft PowerToys (see PORTING.md).
 
@@ -17,10 +17,10 @@ build.bat
 # Manual build
 pip install -r requirements.txt
 pip install pyinstaller
-pyinstaller --onefile --add-data="./resources/img/icon.ico;./resources/img/" --add-data="./resources/img/icon.png;./resources/img/" --add-data="./resources/config/config.json;./resources/config/" --icon="./resources/img/icon.ico" --hidden-import plyer.platforms.win.notification --noconsole --name="CatLock" "./src/main.py"
+pyinstaller --onefile --add-data="./resources/img/icon.ico;./resources/img/" --add-data="./resources/img/icon.png;./resources/img/" --add-data="./resources/config/config.json;./resources/config/" --icon="./resources/img/icon.ico" --hidden-import plyer.platforms.win.notification --noconsole --name="PawGate" "./src/main.py"
 ```
 
-Output: `dist/CatLock.exe`
+Output: `dist/PawGate.exe`
 
 ## Run During Development
 
@@ -34,11 +34,11 @@ Note: Must run from repository root directory due to relative resource paths.
 
 ### Core Components
 
-**CatLockCore** (`src/main.py`):
+**PawGateCore** (`src/main.py`):
 - Main application class and entry point
 - Manages application lifecycle with a main event loop polling `show_overlay_queue`
 - Coordinates keyboard blocking (scan codes 0-255 plus named critical keys via `keyboard.block_key()`)
-- Uses lockfile (`~/.catlock/lockfile.lock`) to ensure single instance
+- Uses lockfile (`~/.pawgate/lockfile.lock`) to ensure single instance
 
 **Threading Model**:
 - Main thread: Event loop checking queue, spawns overlay windows
@@ -50,7 +50,7 @@ Note: Must run from repository root directory due to relative resource paths.
 
 | Module | Purpose |
 |--------|---------|
-| `src/config/config.py` | JSON config from `~/.catlock/config/config.json`; falls back to bundled defaults |
+| `src/config/config.py` | JSON config from `~/.pawgate/config/config.json`; falls back to bundled defaults |
 | `src/keyboard_controller/hotkey_listener.py` | Registers hotkey with `keyboard` library |
 | `src/keyboard_controller/pressed_events_handler.py` | Clears stale pressed events (fixes keyboard library issue #223) |
 | `src/ui/overlay_window.py` | Tkinter full-screen transparent overlay spanning all monitors |
@@ -60,7 +60,7 @@ Note: Must run from repository root directory due to relative resource paths.
 
 ### Configuration
 
-Config stored at `~/.catlock/config/config.json`:
+Config stored at `~/.pawgate/config/config.json`:
 ```json
 {"hotkey": "ctrl+l", "opacity": 0.3, "notificationsEnabled": false}
 ```
