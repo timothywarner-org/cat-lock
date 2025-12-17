@@ -1,0 +1,219 @@
+# KittyLock - Release Workflow
+# WHY: Automated releases on version tags ensure consistent, reproducible builds
+# and eliminate manual upload errors. Creates GitHub releases with auto-generated
+# changelog from commit history.
+#
+# Triggers:
+#   - Tags matching v*.*.* pattern (e.g., v1.0.0, v2.3.1-beta)
+#
+# Jobs:
+#   1. build: Create production Windows executable
+#   2. release: Create GitHub release and upload executable as asset
+#
+# Usage:
+#   git tag -a v1.2.3 -m "Release v1.2.3: Add awesome feature"
+#   git push origin v1.2.3
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # WHY: Semantic versioning pattern (v1.0.0, v2.1.3, etc.)
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (e.g., v1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  build:
+    name: Build Release Executable
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # WHY: Full history for changelog generation
+
+      - name: Extract Version from Tag
+        id: version
+        shell: pwsh
+        run: |
+          if ($env:GITHUB_EVENT_NAME -eq "workflow_dispatch") {
+            $tag = "${{ github.event.inputs.tag }}"
+          } else {
+            $tag = $env:GITHUB_REF -replace 'refs/tags/', ''
+          }
+          $version = $tag -replace '^v', ''
+          echo "tag=$tag" >> $env:GITHUB_OUTPUT
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+          echo "Building version: $version"
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: requirements.txt
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build Production Executable
+        # WHY: --clean ensures no dev artifacts leak into production build
+        run: |
+          pyinstaller --clean CatLock.spec
+
+      - name: Verify Build and Create Checksum
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "dist/CatLock.exe")) {
+            Write-Error "Build failed: CatLock.exe not found"
+            exit 1
+          }
+
+          $size = (Get-Item "dist/CatLock.exe").Length / 1MB
+          Write-Host "Build successful: $([math]::Round($size, 2)) MB"
+
+          # WHY: SHA256 checksum for user verification and security
+          $hash = (Get-FileHash "dist/CatLock.exe" -Algorithm SHA256).Hash
+          $hash | Out-File -FilePath "dist/CatLock.exe.sha256" -Encoding ascii
+          Write-Host "SHA256: $hash"
+
+      - name: Rename Executable with Version
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.version }}"
+          Copy-Item "dist/CatLock.exe" "dist/CatLock-$version.exe"
+          Copy-Item "dist/CatLock.exe.sha256" "dist/CatLock-$version.exe.sha256"
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-build
+          path: |
+            dist/CatLock-${{ steps.version.outputs.version }}.exe
+            dist/CatLock-${{ steps.version.outputs.version }}.exe.sha256
+          retention-days: 90
+          if-no-files-found: error
+
+  release:
+    name: Create GitHub Release
+    runs-on: windows-latest
+    needs: build
+    permissions:
+      contents: write  # WHY: Required to create releases and upload assets
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract Version from Tag
+        id: version
+        shell: pwsh
+        run: |
+          if ($env:GITHUB_EVENT_NAME -eq "workflow_dispatch") {
+            $tag = "${{ github.event.inputs.tag }}"
+          } else {
+            $tag = $env:GITHUB_REF -replace 'refs/tags/', ''
+          }
+          $version = $tag -replace '^v', ''
+          echo "tag=$tag" >> $env:GITHUB_OUTPUT
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-build
+          path: dist/
+
+      - name: Generate Release Notes
+        id: release_notes
+        shell: pwsh
+        run: |
+          $tag = "${{ steps.version.outputs.tag }}"
+          $version = "${{ steps.version.outputs.version }}"
+
+          # WHY: Get previous tag for changelog generation
+          $prevTag = git describe --tags --abbrev=0 "$tag^" 2>$null
+          if (-not $prevTag) {
+            $prevTag = git rev-list --max-parents=0 HEAD
+          }
+
+          # Generate changelog from commits
+          $commits = git log "$prevTag..$tag" --pretty=format:"- %s (%h)" --no-merges
+
+          # Create release body
+          $body = @"
+          ## What's Changed in $version
+
+          $commits
+
+          ## Installation
+
+          1. Download ``CatLock-$version.exe`` below
+          2. (Optional) Verify the SHA256 checksum against ``CatLock-$version.exe.sha256``
+          3. Run the executable - no installation required!
+          4. Right-click the system tray icon to configure settings
+
+          ## Requirements
+
+          - Windows 10/11 (64-bit)
+          - Webcam access permission
+          - .NET Framework 4.7.2+ (usually pre-installed)
+
+          ## Security Note
+
+          This is an unsigned executable. Windows SmartScreen may show a warning on first run.
+          This is expected for open-source projects without code signing certificates.
+
+          **SHA256 Checksum:**
+          ``````
+          $(Get-Content "dist/CatLock-$version.exe.sha256")
+          ``````
+
+          ---
+
+          **Full Changelog**: https://github.com/${{ github.repository }}/compare/$prevTag...$tag
+          "@
+
+          # WHY: Save to file to avoid PowerShell multi-line variable issues
+          $body | Out-File -FilePath "release_notes.md" -Encoding utf8
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: KittyLock ${{ steps.version.outputs.version }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.tag, 'alpha') || contains(steps.version.outputs.tag, 'beta') || contains(steps.version.outputs.tag, 'rc') }}
+          files: |
+            dist/CatLock-${{ steps.version.outputs.version }}.exe
+            dist/CatLock-${{ steps.version.outputs.version }}.exe.sha256
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release Summary
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.version }}"
+          echo "### Release Created Successfully" >> $env:GITHUB_STEP_SUMMARY
+          echo "" >> $env:GITHUB_STEP_SUMMARY
+          echo "**Version:** $version" >> $env:GITHUB_STEP_SUMMARY
+          echo "**Tag:** ${{ steps.version.outputs.tag }}" >> $env:GITHUB_STEP_SUMMARY
+          echo "" >> $env:GITHUB_STEP_SUMMARY
+          echo "**Assets:**" >> $env:GITHUB_STEP_SUMMARY
+          echo "- \`CatLock-$version.exe\`" >> $env:GITHUB_STEP_SUMMARY
+          echo "- \`CatLock-$version.exe.sha256\`" >> $env:GITHUB_STEP_SUMMARY
+          echo "" >> $env:GITHUB_STEP_SUMMARY
+          echo "View the release: https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }}" >> $env:GITHUB_STEP_SUMMARY

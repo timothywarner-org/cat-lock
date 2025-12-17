@@ -7,47 +7,56 @@ echo CatLock Build Script
 echo ========================================
 echo.
 
-REM Check if Python is installed
-    REM Set PYTHON312 to the path of your Python 3.12 installation
-    set "PYTHON312=C:\Users\TimWarner\AppData\Local\Programs\Python\Python312\python.exe"
+REM Use venv if it exists, otherwise use system Python
+if exist ".venv\Scripts\python.exe" (
+    set "PYTHON=.venv\Scripts\python.exe"
+    echo Using virtual environment Python
+) else (
+    set "PYTHON=python"
+    echo Using system Python
+)
 
-    REM Check if Python 3.12 is installed
-    "%PYTHON312%" --version >nul 2>&1
-    if errorlevel 1 (
-        echo ERROR: Python 3.12 is not installed at %PYTHON312%
-        echo Please install Python 3.12 from https://www.python.org/downloads/
-        pause
-        exit /b 1
-    )
+REM Check if Python is available
+"%PYTHON%" --version >nul 2>&1
+if errorlevel 1 (
+    echo ERROR: Python not found. Please install Python or create a venv first:
+    echo   python -m venv .venv
+    echo   .venv\Scripts\activate
+    echo   pip install -r requirements.txt
+    pause
+    exit /b 1
+)
 
 echo [1/3] Installing dependencies...
-    "%PYTHON312%" -m pip install -r requirements.txt
-    if errorlevel 1 (
-        echo ERROR: Failed to install dependencies
-        pause
-        exit /b 1
-    )
+"%PYTHON%" -m pip install -r requirements.txt
+if errorlevel 1 (
+    echo ERROR: Failed to install dependencies
+    pause
+    exit /b 1
+)
 
 echo.
 echo [2/3] Installing PyInstaller...
-    "%PYTHON312%" -m pip install pyinstaller
-    if errorlevel 1 (
-        echo ERROR: Failed to install PyInstaller
-        pause
-        exit /b 1
-    )
+"%PYTHON%" -m pip install pyinstaller
+if errorlevel 1 (
+    echo ERROR: Failed to install PyInstaller
+    pause
+    exit /b 1
+)
 
 echo.
 echo [3/3] Building CatLock executable...
-    "%PYTHON312%" -m pyinstaller --onefile ^
-        --add-data="./resources/img/icon.ico;./resources/img/" ^
-        --add-data="./resources/img/icon.png;./resources/img/" ^
-        --add-data="./resources/config/config.json;./resources/config/" ^
-        --icon="./resources/img/icon.ico" ^
-        --hidden-import plyer.platforms.win.notification ^
-        --noconsole ^
-        --name="CatLock" ^
-        "./src/main.py"
+"%PYTHON%" -m pyinstaller --onefile ^
+    --distpath="./dist" ^
+    --workpath="./build" ^
+    --add-data="./resources/img/icon.ico;./resources/img/" ^
+    --add-data="./resources/img/icon.png;./resources/img/" ^
+    --add-data="./resources/config/config.json;./resources/config/" ^
+    --icon="./resources/img/icon.ico" ^
+    --hidden-import plyer.platforms.win.notification ^
+    --noconsole ^
+    --name="CatLock" ^
+    "./src/main.py"
 
 if errorlevel 1 (
     echo ERROR: Build failed

@@ -1,0 +1,14 @@
+# Development and Testing Dependencies for KittyLock
+# WHY: Separate from runtime requirements.txt to keep production builds lean
+# and avoid installing test frameworks on end-user machines.
+
+# Core Testing Framework
+pytest>=8.0.0          # Modern test runner with excellent fixture support
+pytest-mock>=3.12.0    # Simplified mocking with mocker fixture
+pytest-cov>=4.1.0      # Coverage reporting integrated with pytest
+pytest-timeout>=2.2.0  # Prevent hanging tests (critical for webcam/detection tests)
+
+# Additional Useful Testing Tools (commented out, add as needed)
+# pytest-xdist>=3.5.0  # Parallel test execution (-n auto)
+# pytest-benchmark>=4.0.0  # Performance testing for detection loop
+# hypothesis>=6.98.0   # Property-based testing for edge cases

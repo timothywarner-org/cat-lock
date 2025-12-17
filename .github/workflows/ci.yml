@@ -1,0 +1,140 @@
+# KittyLock - Continuous Integration Workflow
+# WHY: Automated testing and building on every push/PR ensures code quality
+# and catches regressions early. Windows-only testing since this is a Windows utility.
+#
+# Triggers:
+#   - Push to master branch
+#   - All pull requests
+#   - Manual workflow dispatch for ad-hoc testing
+#
+# Jobs:
+#   1. test: Run pytest suite with coverage reporting
+#   2. build: Create Windows executable with PyInstaller
+#
+# Cache Strategy: pip dependencies cached by requirements file hash for speed
+
+name: CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test Suite
+    runs-on: windows-latest
+
+    # WHY: Test on multiple Python versions to ensure compatibility
+    # Focus on 3.11+ as per project requirements
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12']
+      fail-fast: false
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # WHY: Full history for accurate coverage comparison
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+
+      - name: Display Python Version
+        run: python --version
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Run Tests with Coverage
+        # WHY: Continue on error to ensure coverage report is still generated
+        # and uploaded, even if some tests fail
+        continue-on-error: false
+        run: |
+          pytest --cov=src --cov-report=xml --cov-report=term-missing
+
+      - name: Upload Coverage Report
+        if: matrix.python-version == '3.12'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+          retention-days: 30
+
+      - name: Display Coverage Summary
+        if: always()
+        run: |
+          echo "### Test Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          pytest --cov=src --cov-report=term-missing | tail -n 20 >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+  build:
+    name: Build Windows Executable
+    runs-on: windows-latest
+    needs: test  # WHY: Only build if tests pass to avoid wasting CI time
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: requirements.txt
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build Executable with PyInstaller
+        # WHY: Use the existing .spec file for consistent build configuration
+        # --clean ensures no stale artifacts from previous builds
+        run: |
+          pyinstaller --clean CatLock.spec
+
+      - name: Verify Build Output
+        run: |
+          if (Test-Path "dist/CatLock.exe") {
+            Write-Host "Build successful: CatLock.exe created"
+            $size = (Get-Item "dist/CatLock.exe").Length / 1MB
+            Write-Host "Executable size: $([math]::Round($size, 2)) MB"
+          } else {
+            Write-Error "Build failed: CatLock.exe not found"
+            exit 1
+          }
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CatLock-${{ github.sha }}
+          path: dist/CatLock.exe
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Create Build Summary
+        run: |
+          echo "### Build Successful" >> $env:GITHUB_STEP_SUMMARY
+          echo "" >> $env:GITHUB_STEP_SUMMARY
+          echo "Executable: \`CatLock.exe\`" >> $env:GITHUB_STEP_SUMMARY
+          $size = (Get-Item "dist/CatLock.exe").Length / 1MB
+          echo "Size: $([math]::Round($size, 2)) MB" >> $env:GITHUB_STEP_SUMMARY
+          echo "" >> $env:GITHUB_STEP_SUMMARY
+          echo "Download the artifact from the workflow run to test." >> $env:GITHUB_STEP_SUMMARY

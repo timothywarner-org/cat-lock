@@ -1,15 +1,18 @@
 # CatLock
 
 CatLock is a simple utility designed to prevent accidental keyboard input, particularly when your feline friend decides to grace your workspace.
-Currently only supported on **Windows**
+Currently only supported on **Windows**.
 
 ## Features
-- Lock your keyboard with a hotkey (Ctrl + L).
-- See a semi-transparent overlay indicating the keyboard is locked, allowing uninterrupted viewing.
-- Unlock the keyboard by clicking on the overlay.
-- Access configuration options via a convenient system tray menu:
-    - Adjust overlay opacity to suit your preferences.
-    - Enable or disable system notifications when the keyboard is locked.
+- Lock your keyboard with a hotkey (Ctrl+L by default)
+- Semi-transparent overlay shows keyboard is locked while you monitor your screen
+- Unlock by clicking anywhere or pressing the hotkey again
+- System tray menu for quick access to settings:
+    - Adjust overlay opacity (5% to 90%)
+    - Enable/disable lock notifications
+- Blocks all 256 keyboard scan codes plus multimedia keys
+- Single-instance enforcement (won't run multiple copies)
+
 ## Installation
 
 ### Option 1: Build Locally (Recommended)
@@ -38,6 +41,49 @@ Pre-built executables are available on the [Releases](../../releases) page. Note
 ## Caveats
 - Relies on https://github.com/boppreh/keyboard/ which only has full support for Windows
 - OS bound hotkeys take precedence such as `ctrl+alt+del` (this way you don't get locked out if something goes wrong)
+
+---
+
+## Feature Backlog
+
+Future enhancements planned for CatLock. Contributions welcome!
+
+### Tier 1: Automatic Cat Detection (The Dream)
+| Feature | Description | Status |
+|---------|-------------|--------|
+| Webcam cat detection | Use YOLOv8 to detect cat approaching keyboard | Planned |
+| Auto-lock on detection | Lock keyboard automatically when cat detected | Planned |
+| Configurable cooldown | Prevent lock/unlock spam with cooldown timer | Planned |
+| Detection confidence threshold | Adjust sensitivity to avoid false positives | Planned |
+| Screenshot on detection | Capture photographic evidence of the culprit | Planned |
+
+### Tier 2: Quality of Life
+| Feature | Description | Status |
+|---------|-------------|--------|
+| Run on Windows startup | Option to launch CatLock at login | Planned |
+| Lock on screen saver/sleep | Auto-lock when user steps away | Planned |
+| Scheduled lock times | "Lock 9am-5pm on weekdays" | Planned |
+| Quick-toggle global hotkey | Enable/disable protection without menu | Planned |
+| Configurable unlock method | Choose: hotkey only, click only, or both | Planned |
+
+### Tier 3: Fun & Engagement
+| Feature | Description | Status |
+|---------|-------------|--------|
+| Cat activity log | "Fiona attempted 47 keypresses today" | Planned |
+| Statistics dashboard | Charts of cat activity over time | Planned |
+| Custom sounds | Play meow on detection (or deterrent sound) | Planned |
+| Desktop widget | Show cat detection status at a glance | Planned |
+| Achievement system | "Blocked 1000 cat keypresses!" | Planned |
+
+### Tier 4: PowerToys Integration (C# Port)
+| Feature | Description | Status |
+|---------|-------------|--------|
+| Native C# implementation | Port to C# for PowerToys submission | Planned |
+| Windows 11 Settings UI | Native settings page integration | Planned |
+| Keyboard Manager integration | Remap keys while locked | Planned |
+| FancyZones awareness | Lock specific screen zones | Planned |
+
+---
 
 ## Support
 If you found this project helpful or want to support my work, consider buying me a coffee!
