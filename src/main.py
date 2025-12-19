@@ -10,10 +10,10 @@ This module serves as the central coordinator for PawGate, managing:
 
 Architecture Overview:
     The application runs a main event loop that monitors a queue for hotkey signals.
-    When triggered (via Ctrl+L by default), it:
+    When triggered (via Ctrl+B by default), it:
     1. Displays a fullscreen overlay using Tkinter
     2. Blocks ALL keyboard input (scan codes 0-255)
-    3. Waits for a mouse click to unlock
+    3. Waits for the hotkey to be pressed again to unlock
 
     WHY: This prevents cats/pets from accidentally typing, closing windows,
     or triggering Windows shortcuts (Win+D, Alt+F4, etc.) while you're away
@@ -49,6 +49,21 @@ from src.os_controller.tray_icon import TrayIcon
 from src.ui.overlay_window import OverlayWindow
 from src.util.lockfile_handler import check_lockfile, remove_lockfile
 
+# Extended virtual key codes that rely on the keyboard library's extended scan code
+# support. Windows assigns brightness and backlight controls to these codes instead
+# of the standard 0-255 scan code range, so we handle them explicitly.
+EXTENDED_SCAN_CODES = (
+    0x100,  # VK_BRIGHTNESS_DOWN
+    0x101,  # VK_BRIGHTNESS_UP
+    0x10A,  # VK_KBD_BRIGHTNESS_CYCLE
+    0x10B,  # VK_KBD_BRIGHTNESS_DOWN
+    0x10C,  # VK_KBD_BRIGHTNESS_UP
+    0x10D,  # VK_KBD_LIGHT_ON_OFF
+    0x10E,  # VK_KBD_LIGHT_BULB
+    0x10F,  # VK_KBD_LIGHT_MAX
+    0x110,  # VK_KBD_LIGHT_MIN
+)
+
 
 class PawGateCore:
     """
@@ -67,6 +82,7 @@ class PawGateCore:
         program_running: Flag to control main event loop
         blocked_keys: Set of scan codes currently blocked (for cleanup)
         changing_hotkey_queue: Queue for coordinating hotkey changes (unused currently)
+        unlock_event: threading.Event signaling that the unlock hotkey was pressed while locked
 
     WHY we use queues instead of direct method calls:
         Queues provide thread-safe communication between the hotkey listener
@@ -113,6 +129,9 @@ class PawGateCore:
 
         # Unused queue - left for future hotkey change feature
         self.changing_hotkey_queue = Queue()
+
+        # Track unlock requests triggered by the hotkey while locked
+        self.unlock_event = threading.Event()
 
         # Start background threads (order matters - hotkey before tray)
         # WHY order matters: Tray icon menu callbacks reference hotkey state,
@@ -208,6 +227,16 @@ class PawGateCore:
                 # expected and not an error - we just skip those codes.
                 pass
 
+        # Block extended scan codes that Windows uses for brightness/backlight controls.
+        # These live outside the 0-255 range and need explicit handling.
+        for extended_code in EXTENDED_SCAN_CODES:
+            try:
+                keyboard.block_key(extended_code)
+                self.blocked_keys.add(extended_code)
+            except Exception:
+                # WHY silent exception: Not all hardware exposes every brightness code.
+                pass
+
         # Also block critical keys by name for reliability
         # WHY this list: These are the most dangerous keys for cats to press
         # - Windows key: Brings up Start menu or shortcuts (Win+D, Win+L, etc.)
@@ -239,12 +268,10 @@ class PawGateCore:
         overlay, and calls keyboard.stash_state() to clear internal state.
 
         Args:
-            event: Optional Tkinter event (from mouse click binding).
-                   Not used, but required for Tkinter event callback signature.
+            event: Optional Tkinter event object (unused).
 
-        WHY event parameter: Tkinter callbacks always receive an event object
-        when bound to user input (e.g., <Button-1> for mouse clicks). We
-        accept it but don't use it - we just need to know the user clicked.
+        WHY event parameter: Maintains compatibility with Tkinter callback
+        signatures in case unlock_keyboard is ever bound to a GUI event.
 
         WHY stash_state: The keyboard library maintains internal state about
         which keys are currently pressed. After blocking/unblocking, this
@@ -253,7 +280,7 @@ class PawGateCore:
 
         See also:
             - lock_keyboard(): Blocking counterpart
-            - overlay_window.py: Binds mouse click to this method
+            - overlay_window.py: Polls unlock_event to call this method
         """
         # Unblock all scan codes that were successfully blocked
         for key in self.blocked_keys:
@@ -263,31 +290,37 @@ class PawGateCore:
         # Close the Tkinter overlay window if it's open
         if self.root:
             self.root.destroy()  # Exits the Tkinter mainloop
+            self.root = None  # Mark overlay as closed for future hotkey presses
 
         # Clear keyboard library's internal state to prevent phantom key presses
         # WHY necessary: Without this, keys pressed during lock can appear "stuck"
         # after unlock (e.g., Ctrl appears held down even after release)
         keyboard.stash_state()
 
+        # Reset unlock event for the next lock cycle
+        self.unlock_event.clear()
+
     def send_hotkey_signal(self) -> None:
         """
         Signal the main thread that the hotkey was pressed.
 
         This method is called from the hotkey listener thread when the
-        user presses the configured hotkey (default: Ctrl+L).
+        user presses the configured hotkey (default: Ctrl+B).
 
-        WHY use a queue: The hotkey listener runs in a separate thread,
-        but Tkinter is not thread-safe. We can't create the overlay window
-        directly from the hotkey thread. Instead, we signal the main thread
-        via a queue, and the main event loop handles window creation.
-
-        The queue acts as a thread-safe mailbox: "Hey main thread, show the overlay!"
+        WHY mixed signalling: The hotkey listener runs in a separate thread,
+        but Tkinter is not thread-safe. When the hotkey is pressed while
+        unlocked, we use a queue to ask the main thread to display the overlay.
+        When pressed while locked, we set unlock_event so the overlay thread
+        can safely schedule the unlock from within Tkinter's mainloop.
 
         See also:
             - start(): Main event loop that monitors this queue
             - hotkey_listener.py: Calls this method when hotkey pressed
         """
-        self.show_overlay_queue.put(True)
+        if self.root:
+            self.unlock_event.set()
+        else:
+            self.show_overlay_queue.put("lock")
 
     def quit_program(self, icon, item) -> None:
         """
@@ -369,17 +402,21 @@ class PawGateCore:
         while self.program_running:
             # Check if hotkey was pressed (signal in queue)
             if not self.show_overlay_queue.empty():
-                self.show_overlay_queue.get(block=False)  # Consume signal
+                signal = self.show_overlay_queue.get(block=False)
 
-                # Create and show the overlay (blocks until user clicks to unlock)
-                overlay = OverlayWindow(main=self)
+                if signal == "lock":
+                    # Reset unlock requests before displaying overlay
+                    self.unlock_event.clear()
 
-                # Clear keyboard library state before showing overlay
-                # WHY: Prevents keys pressed during overlay creation from appearing stuck
-                keyboard.stash_state()
+                    # Create and show the overlay (blocks until hotkey unlocks)
+                    overlay = OverlayWindow(main=self)
 
-                # This blocks until user clicks (Tkinter mainloop)
-                overlay.open()
+                    # Clear keyboard library state before showing overlay
+                    # WHY: Prevents keys pressed during overlay creation from appearing stuck
+                    keyboard.stash_state()
+
+                    # This blocks until unlock_event fires (Tkinter mainloop)
+                    overlay.open()
 
             # Sleep briefly to avoid busy-waiting (100ms is imperceptible)
             time.sleep(.1)

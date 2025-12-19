@@ -10,7 +10,7 @@ Configuration architecture:
     3. Dev mode: --reset-config flag or PAWGATE_DEV env var forces reset
 
 Settings managed:
-    - hotkey: Global keyboard shortcut to lock (default: "ctrl+l")
+    - hotkey: Global keyboard shortcut to lock (default: "ctrl+b")
     - opacity: Overlay transparency 0.0-1.0 (default: 0.3)
     - notificationsEnabled: Show toast when locked (default: True)
 
@@ -44,9 +44,8 @@ from src.util.web_browser_util import open_about
 BUNDLED_CONFIG_FILE = os.path.join("resources", "config", "config.json")
 
 # Default hotkey if config is missing or invalid
-# WHY Ctrl+L: Mnemonic for "Lock", doesn't conflict with common shortcuts,
-# easy to press with one hand while reaching for mouse to unlock
-DEFAULT_HOTKEY = "ctrl+l"
+# WHY Ctrl+B: "B" stands for "Block", is easy to reach, and avoids common shortcuts
+DEFAULT_HOTKEY = "ctrl+b"
 
 
 def should_use_bundled_config():
@@ -142,7 +141,7 @@ class Config:
     ensure backward compatibility when new settings are added.
 
     Attributes:
-        hotkey (str): Global keyboard shortcut (e.g., "ctrl+l")
+        hotkey (str): Global keyboard shortcut (e.g., "ctrl+b")
         opacity (float): Overlay transparency 0.0-1.0 (e.g., 0.3 = 30% opaque)
         notifications_enabled (bool): Show Windows toast when keyboard locks
 

@@ -27,7 +27,7 @@ def valid_config_data() -> Dict[str, Any]:
     WHY: Tests need known-good config data to verify loading behavior.
     """
     return {
-        "hotkey": "ctrl+l",
+        "hotkey": "ctrl+b",
         "opacity": 0.3,
         "notificationsEnabled": False,
     }
@@ -59,7 +59,7 @@ def tmp_config_file() -> Generator[Path, None, None]:
         Path to temporary config file with default PawGate settings
     """
     default_config: Dict[str, Any] = {
-        "hotkey": "ctrl+l",
+        "hotkey": "ctrl+b",
         "opacity": 0.3,
         "notificationsEnabled": False,
     }
@@ -103,7 +103,7 @@ def mock_config_path(tmp_path, mocker) -> Path:
 
     # Create default config
     default_config = {
-        "hotkey": "ctrl+l",
+        "hotkey": "ctrl+b",
         "opacity": 0.3,
         "notificationsEnabled": False,
     }
@@ -137,7 +137,7 @@ def mock_packaged_path(tmp_path, mocker) -> Path:
 
     # Create bundled default config
     bundled_config = {
-        "hotkey": "ctrl+l",
+        "hotkey": "ctrl+b",
         "opacity": 0.3,
         "notificationsEnabled": False,
     }

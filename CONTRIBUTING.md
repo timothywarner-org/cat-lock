@@ -300,7 +300,7 @@ View coverage report: Open `htmlcov/index.html`
 def test_config_loads_defaults(mock_config_file):
     """Test that Config loads default values when file is missing."""
     config = Config()
-    assert config.hotkey == "ctrl+l"
+    assert config.hotkey == "ctrl+b"
     assert config.opacity == 0.3
 ```
 
@@ -363,14 +363,14 @@ def test_tray_icon_creation(mocker):
 def test_config_loads_defaults(mocker):
     mocker.patch('os.path.exists', return_value=False)
     config = Config()
-    assert config.hotkey == "ctrl+l"
+    assert config.hotkey == "ctrl+b"
 
 # BAD: Mocking the thing we're testing makes test useless
 def test_config_loads_defaults(mocker):
     mock_config = mocker.patch('src.config.config.Config')
-    mock_config.return_value.hotkey = "ctrl+l"
+    mock_config.return_value.hotkey = "ctrl+b"
     config = Config()
-    assert config.hotkey == "ctrl+l"  # This tests nothing!
+    assert config.hotkey == "ctrl+b"  # This tests nothing!
 ```
 
 ### Test Cleanup
@@ -427,7 +427,7 @@ def test_something(temp_lockfile):
 
 3. **Manual testing:**
    - Build and run the executable: `build.bat`
-   - Test the hotkey (Ctrl+L)
+    - Test the hotkey (Ctrl+B)
    - Verify system tray menu works
    - Test config changes persist
    - Unlock with mouse click

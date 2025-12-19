@@ -46,7 +46,7 @@ if errorlevel 1 (
 
 echo.
 echo [3/3] Building PawGate executable...
-"%PYTHON%" -m pyinstaller --onefile ^
+"%PYTHON%" -m PyInstaller --onefile ^
     --distpath="./dist" ^
     --workpath="./build" ^
     --add-data="./resources/img/icon.ico;./resources/img/" ^

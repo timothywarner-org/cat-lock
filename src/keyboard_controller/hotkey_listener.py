@@ -27,7 +27,7 @@ WHY threading.Lock (hotkey_lock):
 See also:
     - main.py: Creates HotkeyListener instance in __init__
     - pressed_events_handler.py: Workaround for keyboard library bug
-    - config.py: Stores the hotkey string (e.g., "ctrl+l")
+    - config.py: Stores the hotkey string (e.g., "ctrl+b")
 """
 
 import threading
@@ -137,9 +137,9 @@ class HotkeyListener:
 
         WHY suppress=True:
             When the hotkey is pressed, we don't want it to reach other
-            applications. For example, if the hotkey is Ctrl+L, without
-            suppress=True, the Ctrl+L would also reach the browser (which
-            uses Ctrl+L for address bar focus). With suppress=True, the
+            applications. For example, if the hotkey is Ctrl+B, without
+                suppress=True, the Ctrl+B would also reach the browser (which
+                uses Ctrl+B for bold text). With suppress=True, the
             keyboard library intercepts the key combination before it reaches
             other applications.
 

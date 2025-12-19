@@ -13,19 +13,15 @@ That's it! The application is now running and ready to protect your keyboard.
 ## Locking Your Keyboard
 
 ### Default Hotkey
-Press **Ctrl + L** simultaneously to lock your keyboard.
+Press **Ctrl + B** simultaneously to lock your keyboard.
 
-**WHY Ctrl+L?**
-This 2-key combination is easy to press quickly when you see your cat approaching, while still being unlikely to trigger accidentally during normal typing. The "L" stands for "Lock" making it memorable.
+**WHY Ctrl+B?**
+"B" stands for "Block"—it's quick to hit with your left hand, avoids most critical OS shortcuts, and mirrors the same keys you use to unlock.
 
 ### What Happens When Locked
 
 1. **Semi-transparent overlay appears** - Your entire screen (all monitors) will be covered with a dark overlay
-2. **Unlock instructions displayed** - The center of your primary monitor shows:
-   ```
-   KEYBOARD LOCKED
-   Press CTRL + L to unlock or click anywhere
-   ```
+2. **Unlock instructions displayed** - The center of your primary monitor reminds you which hotkey toggles the lock.
 3. **All keyboard input is blocked** - Every key on your keyboard becomes inactive, including:
    - Letter and number keys
    - Function keys (F1-F24)
@@ -36,7 +32,7 @@ This 2-key combination is easy to press quickly when you see your cat approachin
 ### What Still Works When Locked
 
 - **Your mouse** - You can still move the cursor and see what's on screen through the semi-transparent overlay
-- **Mouse clicks** - Clicking anywhere on the overlay UNLOCKS the keyboard (changed from earlier versions)
+- **Mouse clicks** - Still available for interacting with other software (e.g., dismissing dialogs) but no longer unlock the keyboard
 - **Ctrl + Alt + Del** - This OS-level hotkey ALWAYS works (see Safety section below)
 - **Monitor viewing** - The overlay is transparent enough to monitor ongoing processes
 
@@ -44,24 +40,15 @@ This 2-key combination is easy to press quickly when you see your cat approachin
 
 ## Unlocking Your Keyboard
 
-### Normal Unlock Options
+### Normal Unlock
 
-**Option 1: Hotkey**
-Press the same hotkey again: **Ctrl + L**
+Press the same hotkey again: **Ctrl + B**.
 
-**Option 2: Mouse Click**
-Click anywhere on the overlay window.
+Once detected, PawGate immediately removes the overlay and restores all keyboard functionality.
 
-The overlay will disappear immediately and all keyboard functionality returns.
+### Why Mouse Unlock Is Disabled
 
-### Mouse Unlock: Design Decision
-
-Earlier versions blocked mouse clicks to prevent cats from unlocking by stepping on the mouse. However, user feedback indicated that:
-1. Quick mouse unlock is more convenient for humans
-2. Cats rarely click mice accidentally in practice
-3. The visual overlay itself often deters cat interference
-
-If you prefer hotkey-only unlock, this may be configurable in future versions.
+To stop enthusiastic paws from brushing the trackpad and escaping, PawGate now ignores mouse clicks while locked. Your mouse still moves and can interact with other software, but only the hotkey toggle unlocks the keyboard.
 
 ---
 
@@ -85,13 +72,12 @@ If you ever need to escape:
 
 Don't panic! The hotkey is displayed in the center of your screen when locked:
 ```
-Press CTRL + L to unlock or click anywhere
+Press CTRL + B to unlock
 ```
 
 If you still can't unlock:
-1. **Click anywhere on the screen** - The easiest unlock method
-2. Use **Ctrl + Alt + Del** (see above)
-3. Or right-click the **PawGate system tray icon** and select **Quit** (this unlocks automatically)
+1. Use **Ctrl + Alt + Del** (see above)
+2. Or right-click the **PawGate system tray icon** and select **Quit** (this unlocks automatically)
 
 ### Other OS Hotkeys That Work
 
@@ -171,8 +157,8 @@ The key combination to lock/unlock the keyboard.
 **Format:** Use lowercase with `+` separators.
 
 **Examples:**
-- `"ctrl+l"` (default - L for Lock)
-- `"ctrl+shift+l"` (more keys to prevent accidental triggers)
+- `"ctrl+b"` (default - B for Block)
+- `"ctrl+shift+b"` (adds a modifier to reduce formatting conflicts)
 - `"ctrl+alt+k"` (K for Keyboard lock)
 - `"ctrl+shift+alt+f12"` (previous default, very hard to trigger accidentally)
 
@@ -182,8 +168,9 @@ The key combination to lock/unlock the keyboard.
 - `Ctrl+C`, `Ctrl+V`, `Ctrl+Z` (clipboard/undo)
 - `Ctrl+S` (save in most apps)
 - `Alt+F4` (close window)
+- `Ctrl+B` (bold formatting in editors) unless you rely on that shortcut frequently
 
-**NOTE:** If you find `Ctrl+L` triggers accidentally, consider adding more modifiers like `Ctrl+Shift+L`.
+**NOTE:** If you bump into conflicts, add modifiers such as `Ctrl+Shift+B` or choose an alternate key.
 
 #### opacity
 How dark the lock overlay appears (0.0 to 1.0).
@@ -240,10 +227,10 @@ Whether to show Windows toast notifications when locking.
 
 1. **Another application is using the same hotkey**
    - Try changing the hotkey in `config.json`
-   - Note: `Ctrl+L` is used by browsers to focus the address bar - this conflict only matters if browser is active
+   - Note: `Ctrl+B` toggles bold formatting in many editors - add a modifier if that causes conflicts
 
 2. **You're not pressing all keys simultaneously**
-   - For `Ctrl+L`, press Ctrl first, then L while holding Ctrl
+   - For `Ctrl+B`, press Ctrl first, then tap B while holding Ctrl
    - For multi-modifier combos, press modifiers first, then the letter/function key
 
 3. **Keyboard layout issues**
@@ -253,7 +240,7 @@ Whether to show Windows toast notifications when locking.
 **Test your hotkey:**
 - Launch PawGate
 - Press your hotkey - the overlay should appear
-- Click the overlay or press hotkey again - the overlay should disappear
+- Press the hotkey again - the overlay should disappear
 
 ### "Some keys still work when locked"
 
@@ -330,11 +317,11 @@ PawGate is designed to be extremely lightweight (< 50 MB RAM, minimal CPU when i
 
 ### For Cat Owners
 
-1. **Test the hotkey before you need it** - Practice locking and unlocking a few times (both hotkey and mouse click)
+1. **Test the hotkey before you need it** - Practice locking and unlocking a few times so the motion becomes automatic
 2. **Use higher opacity (70-90%)** - Cats are less interested in dark screens
-3. **Lock proactively** - Hit Ctrl+L when you see your cat approaching
+3. **Lock proactively** - Hit Ctrl+B when you see your cat approaching
 4. **Train with treats** - Some users reward their cats for NOT jumping on the keyboard
-5. **Quick unlock** - If your cat does walk on the screen, a quick mouse click unlocks without fumbling for the hotkey
+5. **Quick unlock** - Keep your hotkey hand ready; pressing Ctrl+B again is the fastest way back to normal
 
 ### For Shared Workstations
 
@@ -369,7 +356,7 @@ When running inside a VM, keyboard blocking works within the VM only. Host OS ho
 ### Can I use PawGate to protect against toddlers/kids?
 
 Yes! The keyboard lock works for any accidental input. However:
-- Toddlers can unlock by clicking the screen (this is by design for quick adult unlock)
+- Curious toddlers could discover the unlock hotkey if they see the on-screen instructions
 - Determined older children may figure out the unlock hotkey
 - The overlay shows the unlock instructions on screen
 - Consider these less effective than dedicated parental control software for determined children
@@ -391,7 +378,7 @@ No, when PawGate is NOT locked, it has zero impact on other applications. When l
 
 ### Can PawGate lock my mouse too?
 
-No. PawGate only blocks keyboard input. The mouse remains fully functional and clicking anywhere unlocks the keyboard. This is intentional for quick human unlock.
+No. PawGate only blocks keyboard input. The mouse remains fully functional for pointing, but it no longer unlocks the keyboard—only the hotkey does.
 
 ### Is PawGate safe?
 

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-PawGate is a Windows-only keyboard locking utility that prevents accidental input (e.g., from pets). It runs in the system tray and uses a hotkey (default: Ctrl+L) to toggle keyboard lock. When locked, a semi-transparent overlay appears across all monitors. Unlocking is via mouse click or pressing the hotkey again.
+PawGate is a Windows-only keyboard locking utility that prevents accidental input (e.g., from pets). It runs in the system tray and uses a hotkey (default: Ctrl+B) to toggle keyboard lock. When locked, a semi-transparent overlay appears across all monitors. Unlocking now requires the hotkey; mouse clicks no longer release the lock.
 
 **Future goal**: Port to C# for potential inclusion in Microsoft PowerToys (see PORTING.md).
 
@@ -62,10 +62,10 @@ Note: Must run from repository root directory due to relative resource paths.
 
 Config stored at `~/.pawgate/config/config.json`:
 ```json
-{"hotkey": "ctrl+l", "opacity": 0.3, "notificationsEnabled": false}
+{"hotkey": "ctrl+b", "opacity": 0.3, "notificationsEnabled": false}
 ```
 
-Default hotkey changed from Ctrl+Shift+Alt+F12 to Ctrl+L for better usability.
+Default hotkey changed from Ctrl+Shift+Alt+F12 to Ctrl+B for better usability.
 
 ## Dependencies
 

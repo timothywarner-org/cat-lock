@@ -20,9 +20,9 @@ PawGate is a fork of [CatLock](https://github.com/richiehowelll/cat-lock) by [@r
 If you appreciate the original work, please consider [supporting the original author](https://buymeacoffee.com/richiehowelll).
 
 ## Features
-- Lock your keyboard with a hotkey (Ctrl+L by default)
+- Lock your keyboard with a hotkey (Ctrl+B by default)
 - Semi-transparent overlay shows keyboard is locked while you monitor your screen
-- Unlock by clicking anywhere or pressing the hotkey again
+- Unlock by pressing the hotkey again
 - System tray menu for quick access to settings:
     - Adjust overlay opacity (5% to 90%)
     - Enable/disable lock notifications

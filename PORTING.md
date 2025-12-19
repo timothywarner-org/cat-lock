@@ -232,7 +232,7 @@ using System.Text.Json;
 
 public class PawGateSettings
 {
-    public string Hotkey { get; set; } = "Ctrl+L";
+    public string Hotkey { get; set; } = "Ctrl+B";
     public double Opacity { get; set; } = 0.3;
     public bool NotificationsEnabled { get; set; } = false;
 
@@ -612,7 +612,7 @@ string iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources
 1. **Set up module structure** within PowerToys solution
 2. **Implement low-level keyboard hook** for blocking
 3. **Create simple overlay window** (WinUI 3)
-4. **Global hotkey registration** (Ctrl+L)
+4. **Global hotkey registration** (Ctrl+B)
 5. **Basic settings integration** (hardcoded values first)
 
 **Deliverable:** Standalone module that locks keyboard with hotkey, shows overlay.
@@ -784,7 +784,6 @@ public class OverlayWindow : Window
         Content = CreateContent();
 
         // Event handlers
-        MouseLeftButtonDown += OnMouseClick;
         KeyDown += OnKeyDown;
     }
 
@@ -792,7 +791,7 @@ public class OverlayWindow : Window
     {
         var textBlock = new System.Windows.Controls.TextBlock
         {
-            Text = "KEYBOARD LOCKED\nPress Ctrl+L to unlock or click anywhere",
+            Text = "KEYBOARD LOCKED\nPress Ctrl+B to unlock",
             FontSize = 48,
             Foreground = Brushes.White,
             HorizontalAlignment = HorizontalAlignment.Center,
@@ -803,12 +802,6 @@ public class OverlayWindow : Window
         var grid = new System.Windows.Controls.Grid();
         grid.Children.Add(textBlock);
         return grid;
-    }
-
-    private void OnMouseClick(object sender, MouseButtonEventArgs e)
-    {
-        UnlockRequested?.Invoke(this, EventArgs.Empty);
-        Close();
     }
 
     private void OnKeyDown(object sender, KeyEventArgs e)

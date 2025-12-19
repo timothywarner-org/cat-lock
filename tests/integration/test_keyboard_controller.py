@@ -17,7 +17,7 @@ import unittest
 from unittest.mock import Mock, patch, call
 from queue import Queue
 
-from src.main import PawGateCore
+from src.main import PawGateCore, EXTENDED_SCAN_CODES
 
 
 class TestKeyboardController(unittest.TestCase):
@@ -79,9 +79,9 @@ class TestKeyboardController(unittest.TestCase):
         self.patcher_hotkey_listener.stop()
         self.patcher_send_notification.stop()
 
-    def test_lock_keyboard_blocks_256_scan_codes(self) -> None:
+    def test_lock_keyboard_blocks_all_scan_codes(self) -> None:
         """
-        Verify that lock_keyboard blocks all 256 scan codes.
+        Verify that lock_keyboard blocks all scan codes including extended brightness keys.
 
         WHY: Modern keyboards (especially non-US layouts) use extended
         scan codes beyond the basic ASCII range. Testing the full 0-255
@@ -91,9 +91,9 @@ class TestKeyboardController(unittest.TestCase):
         # Act
         self.core.lock_keyboard()
 
-        # Assert - verify range(256) was attempted
-        # WHY: We check len >= 256 because some codes may fail (handled
-        # gracefully), but we want to verify the attempt was made for all
+        # Assert - verify range(256) plus extended codes were attempted
+        # WHY: Some laptops map brightness controls to virtual key codes outside
+        # the base range, so we expect both sets to be blocked.
         block_key_calls = [
             call_args for call_args in self.mock_keyboard.block_key.call_args_list
             if isinstance(call_args[0][0], int)  # Filter to numeric calls only
@@ -102,12 +102,12 @@ class TestKeyboardController(unittest.TestCase):
         # WHY: Extract just the scan codes that were blocked
         blocked_scan_codes = {call_args[0][0] for call_args in block_key_calls}
 
-        # Assert that we attempted all 256 codes
-        attempted_codes = set(range(256))
+        # Assert that we attempted baseline and extended codes
+        attempted_codes = set(range(256)) | set(EXTENDED_SCAN_CODES)
         self.assertEqual(
             attempted_codes,
             blocked_scan_codes,
-            f"Expected all 256 scan codes to be blocked, but got {len(blocked_scan_codes)}"
+            f"Expected {len(attempted_codes)} scan codes to be blocked, but got {len(blocked_scan_codes)}"
         )
 
     def test_lock_keyboard_blocks_critical_keys_by_name(self) -> None:

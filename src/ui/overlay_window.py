@@ -1,16 +1,16 @@
 """
-Fullscreen Overlay Window - Visual feedback and click-to-unlock interface.
+Fullscreen Overlay Window - Visual feedback with hotkey-based unlock.
 
 This module creates a transparent Tkinter window that covers all monitors,
-providing visual indication that the keyboard is locked and a simple unlock
-mechanism (click anywhere to unlock).
+providing visual indication that the keyboard is locked and relaying the
+unlock hotkey press back to the main application.
 
 Design goals:
     1. Cover ALL monitors (multi-monitor support)
     2. Transparent (configurable opacity 5%-90%)
     3. Always on top (can't be hidden by other windows)
     4. No window decorations (title bar, borders, close button)
-    5. Click anywhere to unlock (simple, discoverable UX)
+    5. Unlocks when hotkey is pressed again (consistent toggle UX)
 
 WHY Tkinter instead of pywin32 or other GUI frameworks:
     - Tkinter is stdlib (no extra dependencies)
@@ -52,7 +52,7 @@ class OverlayWindow:
 
     This class creates and manages a Tkinter window that covers the entire
     desktop (all monitors), providing visual feedback that the keyboard is
-    locked and a click-to-unlock interface.
+    locked and routes unlock requests back to the main application.
 
     Attributes:
         main: Reference to PawGateCore instance (for config and callbacks)
@@ -62,7 +62,7 @@ class OverlayWindow:
         - self.main.config.opacity: User's transparency preference
         - self.main.root: Store reference for cleanup later
         - self.main.lock_keyboard(): Trigger keyboard blocking
-        - self.main.unlock_keyboard(): Cleanup when user clicks
+        - self.main.unlock_keyboard(): Cleanup when unlock hotkey pressed
     """
 
     def __init__(self, main):
@@ -82,7 +82,7 @@ class OverlayWindow:
         1. Queries all monitor configurations
         2. Calculates bounding box to cover all monitors
         3. Creates Tkinter window with transparent overlay styling
-        4. Binds mouse click to unlock callback
+        4. Sets up polling to detect unlock hotkey
         5. Locks the keyboard
         6. Enters Tkinter mainloop (blocks until window closed)
 
@@ -123,11 +123,11 @@ class OverlayWindow:
             - Looks less jarring than a solid color
             - Allows users to see if anything important is happening (video, download)
 
-        WHY bind '<Button-1>':
-            Left mouse click unlocks the keyboard. This is:
-            - Simple and discoverable (users naturally try clicking)
-            - Hard for cats to trigger (requires precise motor control)
-            - Works anywhere on any monitor (large target area)
+        WHY poll unlock_event:
+            The overlay runs on Tkinter's main thread. Polling allows us to
+            respond to the hotkey listener (running in another thread) without
+            making unsafe cross-thread Tk calls. When the unlock hotkey is
+            detected, unlock_event is set, and the overlay closes itself.
 
         WHY lock_keyboard AFTER creating window:
             If we locked before window creation, there's a brief moment where
@@ -179,10 +179,9 @@ class OverlayWindow:
         # WHY configurable: Some users want more visibility, others less
         self.main.root.attributes('-alpha', self.main.config.opacity)
 
-        # Bind left mouse click to unlock callback
-        # WHY <Button-1>: Standard Tkinter event for left click
-        # WHY any location: Makes unlocking easy (large target area)
-        self.main.root.bind('<Button-1>', self.main.unlock_keyboard)
+        # Poll for unlock hotkey requests from the main application
+        # WHY polling: Allows background hotkey thread to signal unlock via event
+        self.main.root.after(50, self._wait_for_hotkey_unlock)
 
         # Lock the keyboard AFTER window is created (ensures visual feedback)
         # WHY order matters: Don't block keyboard without showing overlay first
@@ -192,3 +191,16 @@ class OverlayWindow:
         # WHY blocks: Keeps window responsive to mouse clicks and repaints
         # Exits when main.unlock_keyboard() calls root.destroy()
         self.main.root.mainloop()
+
+    def _wait_for_hotkey_unlock(self) -> None:
+        """Poll unlock_event and close overlay when hotkey is pressed."""
+        if not self.main.root:
+            return
+
+        if self.main.unlock_event.is_set():
+            self.main.unlock_event.clear()
+            self.main.unlock_keyboard()
+            return
+
+        # Reschedule polling while overlay remains active
+        self.main.root.after(50, self._wait_for_hotkey_unlock)

@@ -16,7 +16,7 @@ This document provides a technical deep-dive into PawGate's architecture, thread
 
 ## System Overview
 
-PawGate is a Windows-only keyboard locking utility built in Python. It runs as a background system tray application that blocks all keyboard input on demand via a configurable hotkey (default: Ctrl+L).
+PawGate is a Windows-only keyboard locking utility built in Python. It runs as a background system tray application that blocks all keyboard input on demand via a configurable hotkey (default: Ctrl+B).
 
 **Core Capabilities:**
 - Global hotkey registration (monitors system-wide key presses)
@@ -59,7 +59,7 @@ PawGate is a Windows-only keyboard locking utility built in Python. It runs as a
 │ Hotkey Thread       │              │ show_overlay_queue        │
 │ ─────────────       │              │ (Queue)                   │
 │ Listens for hotkey  │──────────────│ Signal: True = show       │
-│ (Ctrl+L by default) │   put(True)  │         overlay           │
+│ (Ctrl+B by default) │   put(True)  │         overlay           │
 │                     │              └───────────────────────────┘
 │ Uses keyboard lib   │
 │ add_hotkey()        │
@@ -93,7 +93,7 @@ PawGate is a Windows-only keyboard locking utility built in Python. It runs as a
 Data Flow on Hotkey Press:
 ───────────────────────────
 
-User presses Ctrl+L
+User presses Ctrl+B
       │
       ▼
 Hotkey Thread detects via keyboard.add_hotkey()
@@ -226,13 +226,13 @@ The `keyboard` library sometimes retains "pressed" state for keys after Windows 
 
 ```
 ┌───────────────────────────────────────────────────────────────┐
-│ 1. User Action: Press Ctrl+L                                 │
+│ 1. User Action: Press Ctrl+B                                 │
 └───────────────────────────────────────────────────────────────┘
                            │
                            ▼
 ┌───────────────────────────────────────────────────────────────┐
 │ 2. Hotkey Thread (keyboard library hook)                     │
-│    keyboard.add_hotkey('ctrl+l', send_hotkey_signal)          │
+│    keyboard.add_hotkey('ctrl+b', send_hotkey_signal)          │
 └───────────────────────────────────────────────────────────────┘
                            │
                            ▼
@@ -258,7 +258,7 @@ The `keyboard` library sometimes retains "pressed" state for keys after Windows 
 │      - overrideredirect=True (no window border)               │
 │      - attributes('-topmost', True) (always on top)           │
 │      - attributes('-alpha', opacity) (transparency)           │
-│      - bind('<Button-1>', unlock_keyboard) (click to unlock)  │
+│      - after(50, _wait_for_hotkey_unlock)                     │
 └───────────────────────────────────────────────────────────────┘
                            │
                            ▼
@@ -280,18 +280,18 @@ The `keyboard` library sometimes retains "pressed" state for keys after Windows 
 └───────────────────────────────────────────────────────────────┘
 ```
 
-### Unlock Sequence (Mouse Click → Unlock)
+### Unlock Sequence (Hotkey Press → Unlock)
 
 ```
 ┌───────────────────────────────────────────────────────────────┐
-│ 1. User Action: Click anywhere on overlay                    │
+│ 1. User Action: Press Ctrl+B again                           │
 └───────────────────────────────────────────────────────────────┘
                            │
                            ▼
 ┌───────────────────────────────────────────────────────────────┐
 │ 2. Tkinter Event Handler                                     │
-│    root.bind('<Button-1>', unlock_keyboard)                   │
-│    Triggers unlock_keyboard(event)                            │
+│    Hotkey listener sets unlock_event                          │
+│    _wait_for_hotkey_unlock() polls and calls unlock_keyboard   │
 └───────────────────────────────────────────────────────────────┘
                            │
                            ▼
@@ -532,7 +532,7 @@ def load():
 
 ```json
 {
-  "hotkey": "ctrl+l",
+    "hotkey": "ctrl+b",
   "opacity": 0.3,
   "notificationsEnabled": false
 }

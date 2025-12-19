@@ -26,7 +26,7 @@ def test_default_hotkey_value():
     If this test fails after an intentional change, update documentation
     and consider backwards compatibility for existing user configs.
     """
-    assert DEFAULT_HOTKEY == "ctrl+l", f"Expected 'ctrl+l', got {DEFAULT_HOTKEY}"
+    assert DEFAULT_HOTKEY == "ctrl+b", f"Expected 'ctrl+b', got {DEFAULT_HOTKEY}"
 
 
 def test_load_valid_config(
@@ -172,7 +172,7 @@ def test_config_survives_empty_file(
     config = Config()
 
     # WHY: Verify defaults were loaded (from bundled config.json)
-    assert config.hotkey == "ctrl+l", "Should fall back to bundled default hotkey"
+    assert config.hotkey == "ctrl+b", "Should fall back to bundled default hotkey"
     assert config.opacity == 0.3, "Should fall back to bundled default opacity"
     assert config.notifications_enabled is False, "Should fall back to bundled default notifications"
 
@@ -206,7 +206,7 @@ def test_config_survives_invalid_json(
     config = Config()
 
     # WHY: Verify defaults were loaded from bundled config
-    assert config.hotkey == "ctrl+l"
+    assert config.hotkey == "ctrl+b"
     assert config.opacity == 0.3
     assert config.notifications_enabled is False
 
