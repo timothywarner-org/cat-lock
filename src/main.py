@@ -96,6 +96,15 @@ class PawGateCore:
         - Config: Settings management
     """
 
+    # Modifier keys that have left/right variants - when user specifies "ctrl",
+    # we must unblock both "left ctrl" and "right ctrl" for the hotkey to work
+    MODIFIER_VARIANTS = {
+        'ctrl': ['ctrl', 'left ctrl', 'right ctrl'],
+        'shift': ['shift', 'left shift', 'right shift'],
+        'alt': ['alt', 'left alt', 'right alt'],
+        'windows': ['windows', 'left windows', 'right windows'],
+    }
+
     def __init__(self) -> None:
         """
         Initialize PawGate and start all background threads.
@@ -177,6 +186,40 @@ class PawGateCore:
         """
         HotkeyListener(self).start_hotkey_listener_thread()
 
+    def _get_hotkey_keys(self) -> list[str]:
+        """
+        Parse the configured hotkey and return all key names that must remain unblocked.
+
+        WHY this is needed:
+            When we block all keyboard input (scan codes 0-255), we also block
+            the keys needed for the unlock hotkey. This causes a lockout where
+            the user cannot press Ctrl+B to unlock. By parsing the hotkey and
+            unblocking those specific keys, the unlock hotkey continues to work.
+
+        WHY expand modifier variants:
+            When the hotkey is "ctrl+b", the user might press either left Ctrl
+            or right Ctrl. We must unblock BOTH variants, otherwise the hotkey
+            only works with one Ctrl key. Same applies to Shift, Alt, and Windows.
+
+        Returns:
+            List of key names to unblock (e.g., ['ctrl', 'left ctrl', 'right ctrl', 'b'])
+
+        Example:
+            hotkey = "ctrl+shift+b"
+            returns = ['ctrl', 'left ctrl', 'right ctrl',
+                       'shift', 'left shift', 'right shift', 'b']
+        """
+        hotkey_keys = []
+        # Split hotkey string (e.g., "ctrl+b" -> ["ctrl", "b"])
+        for key in self.config.hotkey.lower().split('+'):
+            key = key.strip()
+            if key in self.MODIFIER_VARIANTS:
+                # Expand modifiers to include left/right variants
+                hotkey_keys.extend(self.MODIFIER_VARIANTS[key])
+            else:
+                hotkey_keys.append(key)
+        return hotkey_keys
+
     def lock_keyboard(self) -> None:
         """
         Block ALL keyboard input using comprehensive scan code blocking.
@@ -254,6 +297,26 @@ class PawGateCore:
             except Exception:
                 # WHY silent exception: Not all keyboards have these keys
                 # (e.g., desktop keyboards often lack brightness controls)
+                pass
+
+        # CRITICAL: Unblock the hotkey keys so user can unlock!
+        # WHY this is necessary:
+        #     We just blocked ALL keys (scan codes 0-255), which includes the
+        #     keys needed for the unlock hotkey (e.g., Ctrl and B). Without this,
+        #     the user would be locked out with no way to unlock except rebooting.
+        #     By unblocking just the hotkey keys, the unlock hotkey works while
+        #     all other keys remain blocked.
+        # WHY unblock by name:
+        #     The keyboard library's add_hotkey() matches by key name, so we
+        #     unblock by name to ensure consistency. The suppress=True in
+        #     add_hotkey() prevents these keys from reaching other applications
+        #     when pressed as part of the hotkey combination.
+        for key_name in self._get_hotkey_keys():
+            try:
+                keyboard.unblock_key(key_name)
+            except Exception:
+                # WHY silent exception: Some key names may not be recognized
+                # on all keyboard layouts, but we try our best
                 pass
 
         # Notify user that keyboard is locked (if notifications enabled)

@@ -260,6 +260,86 @@ class TestKeyboardController(unittest.TestCase):
             "Some keys should have been successfully blocked"
         )
 
+    def test_get_hotkey_keys_parses_simple_hotkey(self) -> None:
+        """
+        Verify that _get_hotkey_keys correctly parses a simple hotkey.
+
+        WHY: The hotkey must be parsed to determine which keys to unblock
+        after blocking all keyboard input. If parsing fails, the unlock
+        hotkey won't work and the user gets locked out.
+        """
+        # Arrange - set a simple hotkey
+        self.core.config.hotkey = 'ctrl+b'
+
+        # Act
+        keys = self.core._get_hotkey_keys()
+
+        # Assert - should include ctrl variants and b
+        self.assertIn('b', keys)
+        self.assertIn('ctrl', keys)
+        self.assertIn('left ctrl', keys)
+        self.assertIn('right ctrl', keys)
+
+    def test_get_hotkey_keys_expands_all_modifiers(self) -> None:
+        """
+        Verify that _get_hotkey_keys expands all modifier variants.
+
+        WHY: When the hotkey is "ctrl+shift+alt+f12", the user might press
+        left Ctrl OR right Ctrl, left Shift OR right Shift, etc. We must
+        unblock ALL variants to ensure the hotkey works regardless of which
+        physical key the user presses.
+        """
+        # Arrange - set a complex hotkey with multiple modifiers
+        self.core.config.hotkey = 'ctrl+shift+alt+f12'
+
+        # Act
+        keys = self.core._get_hotkey_keys()
+
+        # Assert - should include all modifier variants
+        expected_keys = [
+            'ctrl', 'left ctrl', 'right ctrl',
+            'shift', 'left shift', 'right shift',
+            'alt', 'left alt', 'right alt',
+            'f12'
+        ]
+        for expected_key in expected_keys:
+            self.assertIn(
+                expected_key,
+                keys,
+                f"Expected key '{expected_key}' not found in parsed hotkey"
+            )
+
+    def test_lock_keyboard_unblocks_hotkey_keys(self) -> None:
+        """
+        Verify that lock_keyboard unblocks hotkey keys after blocking all.
+
+        WHY: This is the critical fix for the lockout bug. If we block ALL
+        keys (scan codes 0-255) without unblocking the hotkey keys, the user
+        cannot press Ctrl+B to unlock. This test ensures the fix works.
+
+        Real-world impact: Without this fix, users had to reboot their
+        machine to regain keyboard control. That's a TERRIBLE user experience.
+        """
+        # Arrange - set a known hotkey
+        self.core.config.hotkey = 'ctrl+b'
+
+        # Act
+        self.core.lock_keyboard()
+
+        # Assert - verify unblock_key was called for hotkey keys
+        unblock_calls = [
+            call_args[0][0] for call_args in self.mock_keyboard.unblock_key.call_args_list
+        ]
+
+        # WHY: These are the keys that MUST be unblocked for Ctrl+B to work
+        required_unblocked = ['ctrl', 'left ctrl', 'right ctrl', 'b']
+        for key in required_unblocked:
+            self.assertIn(
+                key,
+                unblock_calls,
+                f"Hotkey key '{key}' was not unblocked - user would be locked out!"
+            )
+
 
 if __name__ == '__main__':
     unittest.main()
