@@ -1,0 +1,58 @@
+[package]
+name = "pawgate"
+version = "1.0.0"
+edition = "2021"
+authors = ["PawGate Contributors"]
+description = "Windows keyboard locking utility - keeps pets from typing"
+license = "MIT"
+repository = "https://github.com/timothywarner-org/pawgate"
+
+[dependencies]
+# Windows API bindings
+windows = { version = "0.58", features = [
+    "Win32_Foundation",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_Graphics_Gdi",
+    "Win32_System_LibraryLoader",
+    "Win32_System_Threading",
+    "Win32_UI_Shell",
+    "Win32_UI_Controls",
+] }
+
+# System tray
+tray-icon = "0.14"
+
+# Menu for tray
+muda = "0.13"
+
+# Configuration
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# File paths
+dirs = "5.0"
+
+# Logging
+log = "0.4"
+env_logger = "0.11"
+
+# Single instance check
+single-instance = "0.3"
+
+# Image handling for tray icon
+image = "0.25"
+
+[build-dependencies]
+embed-resource = "2.4"
+
+[profile.release]
+opt-level = "z"     # Optimize for size
+lto = true          # Link-time optimization
+codegen-units = 1   # Single codegen unit for better optimization
+panic = "abort"     # Smaller binary
+strip = true        # Strip symbols
+
+[[bin]]
+name = "pawgate"
+path = "src/main.rs"

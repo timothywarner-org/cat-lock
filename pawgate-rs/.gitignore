@@ -1,0 +1,18 @@
+# Rust build artifacts
+/target/
+Cargo.lock
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated files that can be regenerated
+# (uncomment if you want to track them)
+# resources/pawgate.ico
+# resources/pawgate.png
