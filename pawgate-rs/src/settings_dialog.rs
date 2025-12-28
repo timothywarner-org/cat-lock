@@ -28,6 +28,9 @@ const ID_NOTIFICATIONS_CHECK: i32 = 104;
 thread_local! {
     static DIALOG_CONFIG: RefCell<Option<Config>> = const { RefCell::new(None) };
     static DIALOG_RESULT: RefCell<Option<Config>> = const { RefCell::new(None) };
+    // WHY: Store dialog font handle so we can delete it in WM_DESTROY to prevent memory leak.
+    // Windows GDI objects like fonts must be explicitly deleted or they leak until process exit.
+    static DIALOG_FONT: RefCell<Option<HFONT>> = const { RefCell::new(None) };
 }
 
 /// Color presets - all colorblind-friendly
@@ -117,8 +120,11 @@ pub fn show_settings_dialog(current_config: &Config) -> Option<Config> {
 unsafe fn create_dialog_controls(hwnd: HWND, config: &Config) {
     let hinstance = GetModuleHandleW(None).ok();
 
-    // Get default font
+    // Get default font and store it for cleanup in WM_DESTROY
     let font = get_default_font();
+    DIALOG_FONT.with(|f| {
+        *f.borrow_mut() = Some(font);
+    });
 
     let mut y = 20;
     let label_width = 120;
@@ -377,7 +383,7 @@ unsafe extern "system" fn settings_wnd_proc(
     match msg {
         WM_COMMAND => {
             let id = (wparam.0 & 0xFFFF) as i32;
-            let notification = ((wparam.0 >> 16) & 0xFFFF) as u32;
+            // Notification code available if needed: ((wparam.0 >> 16) & 0xFFFF) as u32
 
             match id {
                 ID_OK => {
@@ -400,7 +406,7 @@ unsafe extern "system" fn settings_wnd_proc(
         WM_HSCROLL => {
             // Handle slider changes
             let slider = GetDlgItem(hwnd, ID_OPACITY_SLIDER);
-            if lparam.0 == slider.unwrap_or(HWND(std::ptr::null_mut())).0 as isize {
+            if lparam.0 == slider.unwrap_or_default().0 as isize {
                 let pos = SendMessageW(slider.unwrap(), TBM_GETPOS, WPARAM(0), LPARAM(0)).0 as i32;
                 let label = GetDlgItem(hwnd, ID_OPACITY_LABEL);
                 if let Some(lbl) = label {
@@ -417,6 +423,12 @@ unsafe extern "system" fn settings_wnd_proc(
         }
 
         WM_DESTROY => {
+            // Clean up font to prevent memory leak
+            DIALOG_FONT.with(|f| {
+                if let Some(font) = f.borrow_mut().take() {
+                    DeleteObject(font);
+                }
+            });
             PostQuitMessage(0);
             LRESULT(0)
         }

@@ -157,7 +157,11 @@ unsafe extern "system" fn keyboard_hook_proc(
         let vk_code = kb_struct.vkCode;
         let is_keydown = wparam.0 == WM_KEYDOWN as usize || wparam.0 == WM_SYSKEYDOWN as usize;
 
-        HOOK_STATE.with(|hs| {
+        // Use Option to propagate the return value from the closure
+        // WHY: Returns inside HOOK_STATE.with() only return from the closure,
+        // not from keyboard_hook_proc. We must capture the result and return it
+        // from the outer function.
+        let result: Option<LRESULT> = HOOK_STATE.with(|hs| {
             if let Some(hook_state) = hs.borrow().as_ref() {
                 let is_locked = hook_state.state.locked.load(Ordering::SeqCst);
 
@@ -172,7 +176,7 @@ unsafe extern "system" fn keyboard_hook_proc(
                         debug!("Hotkey pressed, locked={}", new_state);
 
                         // Block this keypress so it doesn't pass through
-                        return LRESULT(1);
+                        return Some(LRESULT(1));
                     }
                 }
 
@@ -183,15 +187,21 @@ unsafe extern "system" fn keyboard_hook_proc(
                     // Allow modifier keys through so user can build up the hotkey combo
                     if is_modifier_vk(vk_code) {
                         // Pass through modifier keys
-                        return CallNextHookEx(None, code, wparam, lparam);
+                        return None; // Let it fall through to CallNextHookEx
                     }
 
                     // Block everything else
                     debug!("Blocking key: vk={:#x}", vk_code);
-                    return LRESULT(1);
+                    return Some(LRESULT(1));
                 }
             }
+            None
         });
+
+        // If the closure determined we should block, return that result
+        if let Some(lresult) = result {
+            return lresult;
+        }
     }
 
     CallNextHookEx(None, code, wparam, lparam)

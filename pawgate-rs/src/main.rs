@@ -28,6 +28,14 @@ pub struct AppState {
 
 impl AppState {
     pub fn new() -> Self {
+        Self::default()
+    }
+}
+
+// WHY: Implementing Default allows using AppState::default() and satisfies
+// the clippy::new_without_default lint for types that have a new() method.
+impl Default for AppState {
+    fn default() -> Self {
         Self {
             locked: AtomicBool::new(false),
             should_quit: AtomicBool::new(false),

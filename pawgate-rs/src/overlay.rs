@@ -66,11 +66,13 @@ pub fn create_overlay(state: Arc<AppState>, config: &Config) -> Option<HWND> {
         let height = GetSystemMetrics(SM_CYVIRTUALSCREEN);
 
         // Create layered window
+        // WHY: Window is created without WS_VISIBLE flag so it starts hidden.
+        // The overlay should only appear when the keyboard is locked, not on startup.
         let hwnd = CreateWindowExW(
             WS_EX_LAYERED | WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_TRANSPARENT,
             OVERLAY_CLASS_NAME,
             w!("PawGate Overlay"),
-            WS_POPUP | WS_VISIBLE,
+            WS_POPUP, // No WS_VISIBLE - starts hidden
             x,
             y,
             width,

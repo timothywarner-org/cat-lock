@@ -175,9 +175,11 @@ pub fn run_tray_loop(state: Arc<AppState>, mut config: Config) -> Result<(), Box
         }
 
         // Process Windows messages for proper event handling
+        // WHY: Use None instead of HWND(std::ptr::null_mut()) for cleaner null handle.
+        // PeekMessageW with None retrieves messages for any window on this thread.
         unsafe {
             let mut msg = MSG::default();
-            while PeekMessageW(&mut msg, HWND(std::ptr::null_mut()), 0, 0, PM_REMOVE).as_bool() {
+            while PeekMessageW(&mut msg, None, 0, 0, PM_REMOVE).as_bool() {
                 if msg.message == WM_QUIT {
                     state.should_quit.store(true, Ordering::SeqCst);
                     break;
