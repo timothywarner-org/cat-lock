@@ -1,0 +1,86 @@
+# Release workflow for PawGate Rust implementation
+# Triggered when a tag starting with 'v' is pushed (e.g., v1.0.0)
+
+name: Rust Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-release:
+    name: Build Release
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: pawgate-rs
+
+      - name: Build release
+        working-directory: pawgate-rs
+        run: cargo build --release
+
+      - name: Get version from tag
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/}" >> $env:GITHUB_OUTPUT
+
+      - name: Create release package
+        working-directory: pawgate-rs
+        run: |
+          mkdir release-package
+          copy target\release\pawgate.exe release-package\PawGate.exe
+          copy README.md release-package\
+          copy INSTALL.md release-package\
+          copy ..\LICENSE release-package\ 2>$null; if ($LASTEXITCODE) { echo "No LICENSE file" }
+
+          # Create ZIP
+          Compress-Archive -Path release-package\* -DestinationPath PawGate-${{ steps.version.outputs.version }}-windows-x64.zip
+
+      - name: Generate SHA256
+        working-directory: pawgate-rs
+        run: |
+          $hash = (Get-FileHash -Algorithm SHA256 "PawGate-${{ steps.version.outputs.version }}-windows-x64.zip").Hash
+          "$hash  PawGate-${{ steps.version.outputs.version }}-windows-x64.zip" | Out-File -Encoding utf8 "PawGate-${{ steps.version.outputs.version }}-windows-x64.zip.sha256"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: PawGate ${{ steps.version.outputs.version }}
+          body: |
+            ## PawGate ${{ steps.version.outputs.version }}
+
+            ### Installation
+
+            1. Download `PawGate-${{ steps.version.outputs.version }}-windows-x64.zip`
+            2. Extract to any folder
+            3. Run `PawGate.exe`
+
+            ### Default Keybind
+
+            Press `Ctrl+B` to lock/unlock the keyboard.
+
+            ### What's New
+
+            See [CHANGELOG](https://github.com/${{ github.repository }}/blob/main/pawgate-rs/CHANGELOG.md) for details.
+
+          files: |
+            pawgate-rs/PawGate-${{ steps.version.outputs.version }}-windows-x64.zip
+            pawgate-rs/PawGate-${{ steps.version.outputs.version }}-windows-x64.zip.sha256
+            pawgate-rs/target/release/pawgate.exe
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.version, '-') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
