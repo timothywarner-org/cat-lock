@@ -1,0 +1,109 @@
+# CI workflow for PawGate Rust implementation
+# Runs on every push and PR to verify the build
+
+name: Rust CI
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'pawgate-rs/**'
+      - '.github/workflows/rust-ci.yml'
+  pull_request:
+    branches: [main, master]
+    paths:
+      - 'pawgate-rs/**'
+      - '.github/workflows/rust-ci.yml'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # Check formatting
+  fmt:
+    name: Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: Check formatting
+        working-directory: pawgate-rs
+        run: cargo fmt --all -- --check
+
+  # Run clippy lints
+  clippy:
+    name: Clippy Lints
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: pawgate-rs
+
+      - name: Run clippy
+        working-directory: pawgate-rs
+        run: cargo clippy --all-targets -- -D warnings
+
+  # Build release binary
+  build:
+    name: Build (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: pawgate-rs
+
+      - name: Build release
+        working-directory: pawgate-rs
+        run: cargo build --release
+
+      - name: Show binary info
+        working-directory: pawgate-rs
+        run: |
+          dir target\release\pawgate.exe
+          # Show file size
+          (Get-Item target\release\pawgate.exe).Length / 1MB | ForEach-Object { "Binary size: {0:N2} MB" -f $_ }
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pawgate-windows
+          path: pawgate-rs/target/release/pawgate.exe
+          if-no-files-found: error
+
+  # Run tests (when we have them)
+  test:
+    name: Tests
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: pawgate-rs
+
+      - name: Run tests
+        working-directory: pawgate-rs
+        run: cargo test --all
