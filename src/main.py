@@ -220,6 +220,18 @@ class PawGateCore:
                 hotkey_keys.append(key)
         return hotkey_keys
 
+    def _get_hotkey_scan_codes(self) -> set[int]:
+        """Return the scan codes for the configured hotkey (including modifier variants)."""
+        scan_codes: set[int] = set()
+        for key_name in self._get_hotkey_keys():
+            try:
+                for code in keyboard.key_to_scan_codes(key_name):
+                    scan_codes.add(code)
+            except Exception:
+                # If keyboard cannot resolve a key name on this layout, skip it.
+                continue
+        return scan_codes
+
     def lock_keyboard(self) -> None:
         """
         Block ALL keyboard input using comprehensive scan code blocking.
@@ -258,9 +270,15 @@ class PawGateCore:
         """
         self.blocked_keys.clear()
 
+        # Determine scan codes used by the unlock hotkey so we do NOT block them.
+        hotkey_scan_codes = self._get_hotkey_scan_codes()
+
         # Block full scan code range (0-255) to cover all keyboards including
         # multimedia keys, F13-F24, and regional/international layouts
         for i in range(256):
+            if i in hotkey_scan_codes:
+                # Skip blocking the unlock hotkey scan codes so the hotkey still works.
+                continue
             try:
                 keyboard.block_key(i)
                 self.blocked_keys.add(i)
@@ -273,6 +291,8 @@ class PawGateCore:
         # Block extended scan codes that Windows uses for brightness/backlight controls.
         # These live outside the 0-255 range and need explicit handling.
         for extended_code in EXTENDED_SCAN_CODES:
+            if extended_code in hotkey_scan_codes:
+                continue
             try:
                 keyboard.block_key(extended_code)
                 self.blocked_keys.add(extended_code)

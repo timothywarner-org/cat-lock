@@ -7,6 +7,15 @@ echo PawGate Build Script
 echo ========================================
 echo.
 
+REM Remove user config so builds always start from bundled defaults
+set "CONFIG_FILE=%USERPROFILE%\.pawgate\config\config.json"
+if exist "%CONFIG_FILE%" (
+    del /f /q "%CONFIG_FILE%"
+    echo Removed user config at %CONFIG_FILE%
+) else (
+    echo No user config to remove at %CONFIG_FILE%
+)
+
 REM Use venv if it exists, otherwise use system Python
 if exist ".venv\Scripts\python.exe" (
     set "PYTHON=.venv\Scripts\python.exe"

@@ -44,8 +44,9 @@ from src.util.web_browser_util import open_about
 BUNDLED_CONFIG_FILE = os.path.join("resources", "config", "config.json")
 
 # Default hotkey if config is missing or invalid
-# WHY Ctrl+B: "B" stands for "Block", is easy to reach, and avoids common shortcuts
-DEFAULT_HOTKEY = "ctrl+b"
+# WHY Ctrl+L: Easy to reach, avoids common system shortcuts (unlike Win+L),
+# and maps well to "lock" in PawGate's context.
+DEFAULT_HOTKEY = "ctrl+l"
 
 
 def should_use_bundled_config():

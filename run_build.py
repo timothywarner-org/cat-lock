@@ -1,7 +1,22 @@
 """Run PyInstaller build for PawGate."""
+import os
 import subprocess
 import sys
-import os
+
+from src.util.path_util import get_config_path
+
+
+def delete_user_config() -> None:
+    """Remove the user config file so each build starts clean."""
+    config_path = get_config_path()
+    if os.path.exists(config_path):
+        os.remove(config_path)
+        print(f"Removed user config: {config_path}")
+    else:
+        print(f"No user config found at: {config_path}")
+
+
+delete_user_config()
 
 os.chdir(r'C:\github\pawgate')
 
