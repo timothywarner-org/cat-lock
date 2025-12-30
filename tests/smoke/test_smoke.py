@@ -6,11 +6,10 @@ They catch import errors, basic instantiation failures, and environment
 issues before running the full test suite. Fast feedback loop is critical.
 """
 
-import sys
-from pathlib import Path
-from unittest.mock import patch, MagicMock
+import pytest  # type: ignore  # pylint: disable=import-error
 
-import pytest
+# Allow deferred imports inside tests and fixture args that are intentionally unused
+# pylint: disable=import-error,import-outside-toplevel,unused-argument
 
 
 def test_imports_succeed():
@@ -130,8 +129,8 @@ def test_pawgate_core_initializes(
     # - Lock object creation
     try:
         core = PawGateCore()
-    except Exception as e:
-        pytest.fail(f"PawGateCore initialization failed: {e}")
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        pytest.fail(f"PawGateCore initialization failed: {exc}")
 
     # WHY: Verify critical attributes exist and have correct types
     # These are needed for the application to function

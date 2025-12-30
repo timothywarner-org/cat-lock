@@ -64,6 +64,11 @@ EXTENDED_SCAN_CODES = (
     0x110,  # VK_KBD_LIGHT_MIN
 )
 
+# Always-available emergency unlock hotkey (not user-configurable)
+# to prevent total lockout if the primary hotkey fails. Chosen to reuse
+# modifier keys we already leave available for the primary hotkey.
+EMERGENCY_UNLOCK_HOTKEY = "left ctrl+right ctrl"
+
 
 class PawGateCore:
     """
@@ -142,6 +147,9 @@ class PawGateCore:
         # Track unlock requests triggered by the hotkey while locked
         self.unlock_event = threading.Event()
 
+        # Hard-coded failsafe so users can always unlock
+        self.emergency_hotkey = EMERGENCY_UNLOCK_HOTKEY
+
         # Start background threads (order matters - hotkey before tray)
         # WHY order matters: Tray icon menu callbacks reference hotkey state,
         # so hotkey listener should be initialized first
@@ -149,11 +157,17 @@ class PawGateCore:
 
         # Start the keyboard library bug workaround thread
         # See pressed_events_handler.py for details on the bug
-        self.clear_pressed_events_thread = threading.Thread(target=clear_pressed_events, daemon=True)
+        self.clear_pressed_events_thread = threading.Thread(
+            target=clear_pressed_events,
+            daemon=True,
+        )
         self.clear_pressed_events_thread.start()
 
         # Start system tray icon (runs in its own thread with pystray event loop)
-        self.tray_icon_thread = threading.Thread(target=self.create_tray_icon, daemon=True)
+        self.tray_icon_thread = threading.Thread(
+            target=self.create_tray_icon,
+            daemon=True,
+        )
         self.tray_icon_thread.start()
 
     def create_tray_icon(self) -> None:
@@ -186,48 +200,37 @@ class PawGateCore:
         """
         HotkeyListener(self).start_hotkey_listener_thread()
 
-    def _get_hotkey_keys(self) -> list[str]:
-        """
-        Parse the configured hotkey and return all key names that must remain unblocked.
-
-        WHY this is needed:
-            When we block all keyboard input (scan codes 0-255), we also block
-            the keys needed for the unlock hotkey. This causes a lockout where
-            the user cannot press Ctrl+B to unlock. By parsing the hotkey and
-            unblocking those specific keys, the unlock hotkey continues to work.
-
-        WHY expand modifier variants:
-            When the hotkey is "ctrl+b", the user might press either left Ctrl
-            or right Ctrl. We must unblock BOTH variants, otherwise the hotkey
-            only works with one Ctrl key. Same applies to Shift, Alt, and Windows.
-
-        Returns:
-            List of key names to unblock (e.g., ['ctrl', 'left ctrl', 'right ctrl', 'b'])
-
-        Example:
-            hotkey = "ctrl+shift+b"
-            returns = ['ctrl', 'left ctrl', 'right ctrl',
-                       'shift', 'left shift', 'right shift', 'b']
-        """
-        hotkey_keys = []
-        # Split hotkey string (e.g., "ctrl+b" -> ["ctrl", "b"])
-        for key in self.config.hotkey.lower().split('+'):
+    def _parse_hotkey_keys(self, hotkey: str) -> list[str]:
+        """Return all key names (with modifier variants) for a given hotkey string."""
+        hotkey_keys: list[str] = []
+        for key in hotkey.lower().split('+'):
             key = key.strip()
             if key in self.MODIFIER_VARIANTS:
-                # Expand modifiers to include left/right variants
                 hotkey_keys.extend(self.MODIFIER_VARIANTS[key])
             else:
                 hotkey_keys.append(key)
         return hotkey_keys
 
+    def _get_hotkey_keys(self) -> list[str]:
+        """Return keys for the user-configured hotkey (legacy helper used by tests)."""
+        return self._parse_hotkey_keys(self.config.hotkey)
+
+    def _get_all_unlock_hotkey_keys(self) -> list[str]:
+        """Return a de-duplicated list of keys for primary and emergency hotkeys."""
+        all_keys = self._parse_hotkey_keys(self.config.hotkey)
+        if self.emergency_hotkey:
+            all_keys.extend(self._parse_hotkey_keys(self.emergency_hotkey))
+        # Preserve order while removing duplicates
+        return list(dict.fromkeys(all_keys))
+
     def _get_hotkey_scan_codes(self) -> set[int]:
         """Return the scan codes for the configured hotkey (including modifier variants)."""
         scan_codes: set[int] = set()
-        for key_name in self._get_hotkey_keys():
+        for key_name in self._get_all_unlock_hotkey_keys():
             try:
                 for code in keyboard.key_to_scan_codes(key_name):
                     scan_codes.add(code)
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 # If keyboard cannot resolve a key name on this layout, skip it.
                 continue
         return scan_codes
@@ -282,7 +285,7 @@ class PawGateCore:
             try:
                 keyboard.block_key(i)
                 self.blocked_keys.add(i)
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 # WHY silent exception: Some scan codes don't map to physical keys
                 # on all hardware (e.g., scan code 255 may be unmapped). This is
                 # expected and not an error - we just skip those codes.
@@ -296,7 +299,7 @@ class PawGateCore:
             try:
                 keyboard.block_key(extended_code)
                 self.blocked_keys.add(extended_code)
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 # WHY silent exception: Not all hardware exposes every brightness code.
                 pass
 
@@ -314,7 +317,7 @@ class PawGateCore:
         for key_name in critical_keys:
             try:
                 keyboard.block_key(key_name)
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 # WHY silent exception: Not all keyboards have these keys
                 # (e.g., desktop keyboards often lack brightness controls)
                 pass
@@ -331,10 +334,10 @@ class PawGateCore:
         #     unblock by name to ensure consistency. The suppress=True in
         #     add_hotkey() prevents these keys from reaching other applications
         #     when pressed as part of the hotkey combination.
-        for key_name in self._get_hotkey_keys():
+        for key_name in self._get_all_unlock_hotkey_keys():
             try:
                 keyboard.unblock_key(key_name)
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 # WHY silent exception: Some key names may not be recognized
                 # on all keyboard layouts, but we try our best
                 pass
@@ -342,7 +345,7 @@ class PawGateCore:
         # Notify user that keyboard is locked (if notifications enabled)
         send_notification_in_thread(self.config.notifications_enabled)
 
-    def unlock_keyboard(self, event=None) -> None:
+    def unlock_keyboard(self, _event=None) -> None:
         """
         Unblock all keyboard input and close the overlay window.
 
@@ -405,7 +408,7 @@ class PawGateCore:
         else:
             self.show_overlay_queue.put("lock")
 
-    def quit_program(self, icon, item) -> None:
+    def quit_program(self, icon, _item) -> None:
         """
         Gracefully shut down PawGate and clean up resources.
 

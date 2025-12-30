@@ -14,10 +14,12 @@ Tests cover:
 """
 
 import unittest
-from unittest.mock import Mock, patch, call
-from queue import Queue
+from unittest.mock import Mock, patch
 
 from src.main import PawGateCore, EXTENDED_SCAN_CODES
+
+# Tests intentionally touch semi-private helpers for coverage
+# pylint: disable=protected-access
 
 
 class TestKeyboardController(unittest.TestCase):
@@ -61,6 +63,21 @@ class TestKeyboardController(unittest.TestCase):
         self.mock_config.return_value.notifications_enabled = True
         self.mock_config.return_value.hotkey = 'ctrl+shift+l'
 
+        # Deterministic scan code mapping for hotkey parsing in tests
+        self.mock_keyboard.key_to_scan_codes.side_effect = lambda name: {
+            'ctrl': [29],
+            'left ctrl': [29],
+            'right ctrl': [285],
+            'shift': [42],
+            'left shift': [42],
+            'right shift': [54],
+            'alt': [56],
+            'left alt': [56],
+            'right alt': [312],
+            'l': [38],
+            'u': [22],
+        }.get(name, [])
+
         # WHY: Create core after all patches are active to ensure
         # __init__ doesn't trigger real system interactions
         self.core = PawGateCore()
@@ -91,23 +108,22 @@ class TestKeyboardController(unittest.TestCase):
         # Act
         self.core.lock_keyboard()
 
-        # Assert - verify range(256) plus extended codes were attempted
-        # WHY: Some laptops map brightness controls to virtual key codes outside
-        # the base range, so we expect both sets to be blocked.
+        # Assert - verify expected scan codes were attempted (excluding unlock hotkeys)
         block_key_calls = [
             call_args for call_args in self.mock_keyboard.block_key.call_args_list
-            if isinstance(call_args[0][0], int)  # Filter to numeric calls only
+            if isinstance(call_args[0][0], int)
         ]
 
-        # WHY: Extract just the scan codes that were blocked
         blocked_scan_codes = {call_args[0][0] for call_args in block_key_calls}
 
-        # Assert that we attempted baseline and extended codes
-        attempted_codes = set(range(256)) | set(EXTENDED_SCAN_CODES)
+        # Primary hotkey: ctrl+shift+l ; Emergency: left ctrl + right ctrl
+        skipped_for_hotkeys = {29, 285, 42, 54, 38}
+        attempted_codes = (set(range(256)) - skipped_for_hotkeys) | set(EXTENDED_SCAN_CODES)
+
         self.assertEqual(
             attempted_codes,
             blocked_scan_codes,
-            f"Expected {len(attempted_codes)} scan codes to be blocked, but got {len(blocked_scan_codes)}"
+            f"Expected {len(attempted_codes)} scan codes, got {len(blocked_scan_codes)}",
         )
 
     def test_lock_keyboard_blocks_critical_keys_by_name(self) -> None:
@@ -230,19 +246,10 @@ class TestKeyboardController(unittest.TestCase):
         # Act - should NOT raise exception
         try:
             self.core.lock_keyboard()
-            exception_raised = False
-        except Exception as e:
-            exception_raised = True
-            self.fail(f"lock_keyboard raised exception: {e}")
-
-        # Assert - verify function completed
-        self.assertFalse(exception_raised, "lock_keyboard should not raise exceptions")
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            self.fail(f"lock_keyboard raised exception: {exc}")
 
         # Assert - verify successful blocks were recorded
-        # WHY: Only successfully blocked keys should be in the set
-        # (so we know which ones to unblock later)
-        successful_blocks = set(range(256)) - failing_scan_codes
-
         # WHY: Can't directly compare sets because named keys also get blocked
         # Just verify the failing codes are NOT in blocked_keys
         for failing_code in failing_scan_codes:
@@ -338,6 +345,26 @@ class TestKeyboardController(unittest.TestCase):
                 key,
                 unblock_calls,
                 f"Hotkey key '{key}' was not unblocked - user would be locked out!"
+            )
+
+    def test_lock_keyboard_unblocks_emergency_hotkey(self) -> None:
+        """Verify the built-in emergency hotkey keys are also unblocked."""
+        # Arrange - use defaults configured in setUp
+
+        # Act
+        self.core.lock_keyboard()
+
+        # Assert - emergency combo keys should be unblocked
+        unblock_calls = [
+            call_args[0][0] for call_args in self.mock_keyboard.unblock_key.call_args_list
+        ]
+
+        emergency_keys = ['left ctrl', 'right ctrl']
+        for key in emergency_keys:
+            self.assertIn(
+                key,
+                unblock_calls,
+                f"Emergency hotkey key '{key}' was not unblocked"
             )
 
 

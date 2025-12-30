@@ -118,7 +118,11 @@ class HotkeyListener:
 
             # If an old thread exists and is running, wait for it to exit
             # WHY check current_thread: Prevent deadlock if somehow called from within hotkey thread
-            if self.main.hotkey_thread and threading.current_thread() is not self.main.hotkey_thread and self.main.hotkey_thread.is_alive():
+            if (
+                self.main.hotkey_thread
+                and threading.current_thread() is not self.main.hotkey_thread
+                and self.main.hotkey_thread.is_alive()
+            ):
                 self.main.hotkey_thread.join()
 
             # Create and start new hotkey listener thread
@@ -168,6 +172,11 @@ class HotkeyListener:
         # Register the global hotkey with the keyboard library
         # WHY suppress=True: Prevent hotkey from reaching other applications
         keyboard.add_hotkey(self.main.config.hotkey, self.main.send_hotkey_signal, suppress=True)
+
+        # Register a built-in emergency unlock hotkey so users are never stuck
+        emergency_hotkey = getattr(self.main, "emergency_hotkey", None)
+        if emergency_hotkey and emergency_hotkey != self.main.config.hotkey:
+            keyboard.add_hotkey(emergency_hotkey, self.main.send_hotkey_signal, suppress=True)
 
         # Keep thread alive while hotkey should be registered
         # WHY loop: add_hotkey() doesn't block, but we need thread alive for hook to persist
